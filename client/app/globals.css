@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  
+  /* Light theme colors */
+  --nav-bg: #0B4F8A;
+  --nav-text: #ffffff;
+  --card-bg: #ffffff;
+  --card-text: #171717;
+  --border-color: #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --nav-bg: #0A2E4F;
+    --nav-text: #ffffff;
+    --card-bg: #1a1a1a;
+    --card-text: #ededed;
+    --border-color: #374151;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair-display);
+
+  /* Indhu Industries Color Palette */
+  --color-brand-primary: #0B4F8A;
+  --color-brand-secondary: #0A6FB5;
+  --color-brand-accent: #C6D300;
+  --color-brand-navy: #0A2E4F;
+  --color-brand-light: #EAF3FA;
+}
+
+/* Theme classes */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --nav-bg: #0A2E4F;
+  --nav-text: #ffffff;
+  --card-bg: #1a1a1a;
+  --card-text: #ededed;
+  --border-color: #374151;
+}
+
+.light {
+  --background: #ffffff;
+  --foreground: #171717;
+  --nav-bg: #0B4F8A;
+  --nav-text: #ffffff;
+  --card-bg: #ffffff;
+  --card-text: #171717;
+  --border-color: #e5e7eb;
+}
+
+/* Ensure dark theme overrides all default styles */
+.dark body, .dark html {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+}
+
+/* Apply dark theme styles */
+.dark body {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+}
+
+.dark .bg-brand-primary {
+  background-color: #0A2E4F !important;
+}
+
+/* Apply dark theme to all elements */
+.dark {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #ffffff !important;
+}
+
+.dark a {
+  color: #3b82f6 !important;
+}
+
+.dark a:hover {
+  color: #60a5fa !important;
+}
+
+/* Dark theme for cards and containers */
+.dark .bg-white {
+  background-color: #1a1a1a !important;
+  color: #ededed !important;
+}
+
+.dark .text-gray-900 {
+  color: #ededed !important;
+}
+
+.dark .text-gray-800 {
+  color: #d4d4d4 !important;
+}
+
+.dark .text-gray-700 {
+  color: #a3a3a3 !important;
+}
+
+/* Dark theme for borders */
+.dark .border {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  font-weight: 700;
+}
+
+.text-brand-heading {
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
