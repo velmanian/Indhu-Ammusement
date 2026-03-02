@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: indhu-backend
+    env: node
+    region: oregon
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PORT
+        value: 10000

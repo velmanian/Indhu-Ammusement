@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchAdmin, createProduct, updateEnquiryStatus, deleteEnquiry } from '@/lib/adminApi';
+import { fetchAdmin, createProduct, updateProduct, deleteProduct, updateEnquiryStatus, deleteEnquiry } from '@/lib/adminApi';
 import { Enquiry, Product, Category } from '@/types';
 import { LayoutDashboard, ShoppingBag, MessageSquare, LogOut, Loader2, Plus, Edit, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'enquiries' | 'products'>('enquiries');
   const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'RESPONDED' | 'CLOSED'>('ALL');
   const [selectedEnquiries, setSelectedEnquiries] = useState<number[]>([]);
@@ -51,17 +52,17 @@ export default function AdminDashboard() {
     try {
       // Update the status in the backend
       await updateEnquiryStatus(enquiryId, { status: newStatus });
-      
+
       // Update the local state
-      setEnquiries(prev => prev.map(enq => 
+      setEnquiries(prev => prev.map(enq =>
         enq.id === enquiryId ? { ...enq, status: newStatus } : enq
       ));
-      
+
       console.log('Enquiry status updated successfully');
     } catch (error) {
       console.error('Error updating enquiry status:', error);
       // Revert the status in UI if the update failed
-      setEnquiries(prev => prev.map(enq => 
+      setEnquiries(prev => prev.map(enq =>
         enq.id === enquiryId ? { ...enq, status: enquiries.find(e => e.id === enquiryId)?.status || enq.status } : enq
       ));
     }
@@ -69,17 +70,17 @@ export default function AdminDashboard() {
 
   const handleDeleteEnquiry = async (enquiryId: number) => {
     if (!confirm('Are you sure you want to delete this enquiry?')) return;
-    
+
     try {
       // Delete from backend
       await deleteEnquiry(enquiryId);
-      
+
       // Update local state
       setEnquiries(prev => prev.filter(enq => enq.id !== enquiryId));
-      
+
       // Remove from selection if it was selected
       setSelectedEnquiries(prev => prev.filter(id => id !== enquiryId));
-      
+
       console.log('Enquiry deleted successfully');
     } catch (error) {
       console.error('Error deleting enquiry:', error);
@@ -89,19 +90,19 @@ export default function AdminDashboard() {
 
   const handleDeleteSelectedEnquiries = async () => {
     if (selectedEnquiries.length === 0) return;
-    
+
     if (!confirm(`Are you sure you want to delete ${selectedEnquiries.length} enquiries?`)) return;
-    
+
     try {
       // Delete all selected enquiries
       await Promise.all(
         selectedEnquiries.map(id => deleteEnquiry(id))
       );
-      
+
       // Update local state
       setEnquiries(prev => prev.filter(enq => !selectedEnquiries.includes(enq.id)));
       setSelectedEnquiries([]);
-      
+
       console.log(`${selectedEnquiries.length} enquiries deleted successfully`);
     } catch (error) {
       console.error('Error deleting enquiries:', error);
@@ -110,8 +111,8 @@ export default function AdminDashboard() {
   };
 
   const toggleEnquirySelection = (enquiryId: number) => {
-    setSelectedEnquiries(prev => 
-      prev.includes(enquiryId) 
+    setSelectedEnquiries(prev =>
+      prev.includes(enquiryId)
         ? prev.filter(id => id !== enquiryId)
         : [...prev, enquiryId]
     );
@@ -126,7 +127,7 @@ export default function AdminDashboard() {
   };
 
   // Filter enquiries based on status
-  const filteredEnquiries = enquiries.filter(enq => 
+  const filteredEnquiries = enquiries.filter(enq =>
     statusFilter === 'ALL' || enq.status === statusFilter
   );
 
@@ -139,17 +140,48 @@ export default function AdminDashboard() {
   const handleAddProduct = async (productData: any) => {
     setSubmitLoading(true);
     try {
-      await createProduct(productData);
+      if (editingProduct) {
+        // Edit mode
+        const id = String((editingProduct as any)._id || editingProduct.id);
+        await updateProduct(id, productData);
+      } else {
+        // Add mode
+        await createProduct(productData);
+      }
       setShowProductModal(false);
+      setEditingProduct(null);
       // Refresh products list
       const prodData = await fetchAdmin('/products');
       setProducts(prodData);
     } catch (error) {
-      console.error('Error adding product:', error);
-      alert('Failed to add product');
+      console.error('Error saving product:', error);
+      alert('Failed to save product');
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!confirm(`Are you sure you want to delete "${product.name}"?`)) return;
+    try {
+      const id = String((product as any)._id || product.id);
+      await deleteProduct(id);
+      const prodData = await fetchAdmin('/products');
+      setProducts(prodData);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product');
+    }
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setShowProductModal(true);
+  };
+
+  const openAddModal = () => {
+    setEditingProduct(null);
+    setShowProductModal(true);
   };
 
   if (loading) return (
@@ -164,19 +196,19 @@ export default function AdminDashboard() {
       <aside className="w-64 bg-blue-900 text-white p-6 hidden md:block">
         <h2 className="text-2xl font-bold mb-10">Admin Panel</h2>
         <nav className="space-y-4">
-          <button 
+          <button
             onClick={() => setActiveTab('enquiries')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${activeTab === 'enquiries' ? 'bg-white/20' : 'hover:bg-white/10'}`}
           >
             <MessageSquare size={20} /> Enquiries
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('products')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${activeTab === 'products' ? 'bg-white/20' : 'hover:bg-white/10'}`}
           >
             <ShoppingBag size={20} /> Products
           </button>
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500 transition mt-20"
           >
@@ -213,8 +245,8 @@ export default function AdminDashboard() {
               </>
             )}
             {activeTab === 'products' && (
-              <button 
-                onClick={() => setShowProductModal(true)}
+              <button
+                onClick={openAddModal}
                 className="bg-blue-900 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-800 transition"
               >
                 <Plus size={20} /> Add Product
@@ -281,7 +313,7 @@ export default function AdminDashboard() {
                             {enq.selectedProducts && Array.isArray(enq.selectedProducts) && enq.selectedProducts.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {enq.selectedProducts.map((prod: any, index: number) => (
-                                  <span 
+                                  <span
                                     key={enq.id + '-' + index}
                                     className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                                     title={prod.name || prod.id || 'Unknown Product'}
@@ -298,14 +330,14 @@ export default function AdminDashboard() {
                               <div className="text-xs text-gray-500 italic">General</div>
                             )}
                           </div>
-                          
+
                           {/* Usage Purpose */}
                           {enq.usagePurpose && enq.usagePurpose.length > 0 && (
                             <div>
                               <div className="text-xs font-semibold text-gray-500 mb-1">Usage:</div>
                               <div className="flex flex-wrap gap-1">
                                 {enq.usagePurpose.map((purpose: string, index: number) => (
-                                  <span 
+                                  <span
                                     key={enq.id + '-purpose-' + index}
                                     className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                                   >
@@ -324,9 +356,9 @@ export default function AdminDashboard() {
                         <div className="text-sm text-gray-900 max-w-[150px] truncate hidden lg:block" title={enq.message}>{enq.message}</div>
                         <div className="mt-2">
                           <span className={'px-2 py-1 rounded-full text-xs font-bold ' +
-                            (enq.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
-                            enq.status === 'RESPONDED' ? 'bg-green-100 text-green-800' : 
-                            'bg-red-100 text-red-800')
+                            (enq.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                              enq.status === 'RESPONDED' ? 'bg-green-100 text-green-800' :
+                                'bg-red-100 text-red-800')
                           }>
                             {enq.status}
                           </span>
@@ -334,7 +366,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
                         <div className="flex flex-col gap-2">
-                          <select 
+                          <select
                             value={enq.status}
                             onChange={(e) => handleUpdateEnquiryStatus(enq.id, e.target.value)}
                             className="w-full text-xs font-bold px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -344,23 +376,23 @@ export default function AdminDashboard() {
                             <option value="CLOSED">CLOSED</option>
                           </select>
                           <div className="flex gap-2 mt-2">
-                            <a 
+                            <a
                               href={'https://wa.me/' + enq.phone.replace(/[^0-9]/g, '') + '?text=Hello ' + encodeURIComponent(enq.name) + ', we received your enquiry about ' + (enq.selectedProducts && enq.selectedProducts.length > 0 ? enq.selectedProducts[0]?.name : enq.product?.name || 'our products') + ' and would like to assist you.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition duration-200"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                                <path d="M17.502 16.842c-.94-.618-1.826-1.132-2.905-1.132-1.387 0-2.33.722-3.42 2.158-1.957-1.044-3.75-3.419-3.75-5.81 0-3.312 2.96-6.437 6.96-6.437 3.867 0 6.54 2.812 6.54 6.06 0 1.866-.84 3.533-2.375 4.724zm-4.835-9.69c-2.077 0-3.75 1.8-3.75 4 0 1.08.66 2.106 1.83 2.64.3.12.42.3.3.54l-1.02 2.34c-.12.3.06.42.3.48l2.46-.54c.72 0 1.38-.18 1.98-.48.96-.42 1.62-1.26 1.62-2.28 0-2.2-1.68-4-3.75-4z"/><circle cx="10.5" cy="9" r="1"/><circle cx="13.5" cy="9" r="1"/><path d="M18 3H6c-1.657 0-3 1.343-3 3v12c0 1.657 1.343 3 3 3h12c1.657 0 3-1.343 3-3V6c0-1.657-1.343-3-3-3zm.5 15c0 .276-.224.5-.5.5H6c-.276 0-.5-.224-.5-.5V6c0-.276.224-.5.5-.5h12c.276 0 .5.224.5.5v12z"/>
+                                <path d="M17.502 16.842c-.94-.618-1.826-1.132-2.905-1.132-1.387 0-2.33.722-3.42 2.158-1.957-1.044-3.75-3.419-3.75-5.81 0-3.312 2.96-6.437 6.96-6.437 3.867 0 6.54 2.812 6.54 6.06 0 1.866-.84 3.533-2.375 4.724zm-4.835-9.69c-2.077 0-3.75 1.8-3.75 4 0 1.08.66 2.106 1.83 2.64.3.12.42.3.3.54l-1.02 2.34c-.12.3.06.42.3.48l2.46-.54c.72 0 1.38-.18 1.98-.48.96-.42 1.62-1.26 1.62-2.28 0-2.2-1.68-4-3.75-4z" /><circle cx="10.5" cy="9" r="1" /><circle cx="13.5" cy="9" r="1" /><path d="M18 3H6c-1.657 0-3 1.343-3 3v12c0 1.657 1.343 3 3 3h12c1.657 0 3-1.343 3-3V6c0-1.657-1.343-3-3-3zm.5 15c0 .276-.224.5-.5.5H6c-.276 0-.5-.224-.5-.5V6c0-.276.224-.5.5-.5h12c.276 0 .5.224.5.5v12z" />
                               </svg>
                               <span className="text-xs font-bold ml-1">WhatsApp</span>
                             </a>
-                            <a 
+                            <a
                               href={'mailto:' + enq.email + '?subject=Regarding your enquiry&body=Hello ' + encodeURIComponent(enq.name) + ', we received your enquiry about ' + (enq.selectedProducts && enq.selectedProducts.length > 0 ? enq.selectedProducts[0]?.name : enq.product?.name || 'our products') + ' and would like to assist you.'}
                               className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition duration-200"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                                <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
+                                <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z" />
                               </svg>
                               <span className="text-xs font-bold ml-1">Email</span>
                             </a>
@@ -382,49 +414,67 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {products.map(product => (
-              <div key={product.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center">
-                    {product.images && product.images[0] ? (
-                      <img 
-                        src={product.images[0]} 
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder-image.png';
-                        }}
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-xs text-center">No Image</div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{product.name}</h3>
-                    <p className="text-sm text-gray-500 truncate max-w-[150px]">{product.category?.name || 'Uncategorized'}</p>
-                    <div className="mt-3 flex gap-3">
-                      <button className="text-blue-900 text-sm font-bold hover:underline flex items-center gap-1">
-                        <Edit size={16} /> Edit
-                      </button>
-                      <button className="text-red-500 text-sm font-bold hover:underline flex items-center gap-1">
-                        <Trash2 size={16} /> Delete
-                      </button>
+            {products.length === 0 ? (
+              <div className="col-span-full text-center py-20">
+                <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-400 font-medium">No products yet</p>
+                <p className="text-gray-400 text-sm mt-1">Click "Add Product" to get started</p>
+              </div>
+            ) : (
+              products.map(product => (
+                <div key={(product as any)._id || product.id} className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                  <div className="flex gap-4">
+                    <div className="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0">
+                      {product.images && product.images[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={e => {
+                            (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          }}
+                        />
+                      ) : (
+                        <div className="text-gray-400 text-xs text-center p-2">No Image</div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                      <p className="text-sm text-gray-500 truncate">{product.category?.name || 'Uncategorized'}</p>
+                      {product.description && (
+                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{product.description}</p>
+                      )}
+                      <div className="mt-3 flex gap-3">
+                        <button
+                          onClick={() => openEditModal(product)}
+                          className="text-blue-900 text-sm font-bold hover:underline flex items-center gap-1"
+                        >
+                          <Edit size={14} /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product)}
+                          className="text-red-500 text-sm font-bold hover:underline flex items-center gap-1"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
       </main>
-      
+
       <ProductModal
         isOpen={showProductModal}
-        onClose={() => setShowProductModal(false)}
+        onClose={() => { setShowProductModal(false); setEditingProduct(null); }}
         onSubmit={handleAddProduct}
         categories={categories}
         loading={submitLoading}
+        editingProduct={editingProduct}
       />
     </div>
   );

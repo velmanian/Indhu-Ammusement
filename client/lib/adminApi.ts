@@ -23,6 +23,40 @@ export const createProduct = async (data: any) => {
   return res.json();
 };
 
+export const updateProduct = async (id: string, data: any) => {
+  const res = await fetch(`${API_URL}/admin/products/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeader(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update product');
+  return res.json();
+};
+
+export const deleteProduct = async (id: string) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+  const res = await fetch(`${API_URL}/admin/products/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to delete product');
+  return res.json();
+};
+
+export const uploadImages = async (files: File[]): Promise<string[]> => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+  const formData = new FormData();
+  files.forEach(file => formData.append('images', file));
+  const res = await fetch(`${API_URL}/admin/upload`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+  if (!res.ok) throw new Error('Failed to upload images');
+  const data = await res.json();
+  return data.urls as string[];
+};
+
 export const updateEnquiryStatus = async (enquiryId: number, data: any) => {
   const res = await fetch(`${API_URL}/admin/enquiries/${enquiryId}`, {
     method: 'PUT',
