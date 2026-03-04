@@ -19,7 +19,8 @@ const PORT = process.env.PORT || 5000;
 // Allowed CORS origins (local + deployed frontends)
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://indhu-ammusement.onrender.com",
+  "https://indhu-ammusement.vercel.app",
+  "https://indhu-industries.vercel.app", // Anticipating possible aliases
   // Allow configuring extra origins via env without code changes
   process.env.CLIENT_URL || "",
   process.env.CLIENT_URL_PROD || "",
