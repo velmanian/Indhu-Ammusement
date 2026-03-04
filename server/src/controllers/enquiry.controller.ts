@@ -7,43 +7,49 @@ import { formatWhatsAppMessage, generateWhatsAppUrl, validateWhatsAppData } from
 export const submitEnquiry = async (req: Request, res: Response) => {
   try {
     const { name, phone, email, location, message, productId, selectedProducts, usagePurpose, additionalInfo } = req.body;
-    
+
     // Validate required data
     if (!validateWhatsAppData({ name, phone, location })) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing required fields: name, phone, and location are required' 
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: name, phone, and location are required'
       });
     }
 
     // Create enquiry in database
     let product = null;
-    if (productId) {
-      product = await ProductModel.findById(productId);
+    let enquiryId = Date.now().toString();
+    try {
+      if (productId) {
+        product = await ProductModel.findById(productId);
+      }
+
+      const enquiryData: any = {
+        name,
+        phone,
+        email: email || '',
+        location,
+        message: message || 'Product enquiry',
+      };
+
+      if (product) {
+        enquiryData.productId = product._id;
+      }
+
+      // Handle selected products array from the form
+      if (selectedProducts && selectedProducts.length > 0) {
+        enquiryData.selectedProducts = selectedProducts;
+      }
+
+      const enquiry = new EnquiryModel(enquiryData);
+      await enquiry.save();
+
+      // Populate the product data
+      await enquiry.populate('productId', 'name slug description');
+      enquiryId = enquiry.id;
+    } catch (dbError) {
+      console.error('Warning: Failed to save enquiry to database, but continuing with WhatsApp URL generation:', dbError);
     }
-    
-    const enquiryData: any = { 
-      name, 
-      phone, 
-      email: email || '', 
-      location, 
-      message: message || 'Product enquiry', 
-    };
-    
-    if (product) {
-      enquiryData.productId = product._id;
-    }
-    
-    // Handle selected products array from the form
-    if (selectedProducts && selectedProducts.length > 0) {
-      enquiryData.selectedProducts = selectedProducts;
-    }
-    
-    const enquiry = new EnquiryModel(enquiryData);
-    await enquiry.save();
-    
-    // Populate the product data
-    await enquiry.populate('productId', 'name slug description');
 
     // Generate formatted WhatsApp message using utility function
     const whatsappMessage = formatWhatsAppMessage({
@@ -58,14 +64,14 @@ export const submitEnquiry = async (req: Request, res: Response) => {
     });
 
     const adminWhatsAppNumber = '916379026500'; // Your actual WhatsApp number
-    
+
     // Generate the click-to-chat URL using utility function
     const whatsappUrl = generateWhatsAppUrl(whatsappMessage, adminWhatsAppNumber);
-    
+
     // Log for debugging (in production, you might want to remove this)
     console.log('Generated WhatsApp URL:', whatsappUrl);
     console.log('Message length:', whatsappMessage.length);
-    
+
     // Optional: Send to WhatsApp Business API (uncomment when ready)
     /*
     try {
@@ -85,10 +91,10 @@ export const submitEnquiry = async (req: Request, res: Response) => {
     }
     */
 
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: 'Enquiry submitted successfully',
-      enquiryId: enquiry.id,
+      enquiryId: enquiryId,
       whatsappUrl: whatsappUrl // Include the generated WhatsApp URL
     });
   } catch (error) {
@@ -101,12 +107,12 @@ export const updateEnquiryStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     // Validate status
     if (!['PENDING', 'RESPONDED', 'CLOSED'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
-    
+
     const enquiry = await EnquiryModel.findByIdAndUpdate(
       id,
       { status },
@@ -119,11 +125,11 @@ export const updateEnquiryStatus = async (req: Request, res: Response) => {
         select: 'name slug description'
       }
     });
-    
+
     if (!enquiry) {
       return res.status(404).json({ message: 'Enquiry not found' });
     }
-    
+
     res.json(enquiry);
   } catch (error) {
     res.status(500).json({ message: 'Error updating enquiry status', error });
@@ -162,11 +168,11 @@ export const getEnquiryById = async (req: Request, res: Response) => {
         }
       })
       .select('-__v'); // Exclude version key
-    
+
     if (!enquiry) {
       return res.status(404).json({ message: 'Enquiry not found' });
     }
-    
+
     res.json(enquiry);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching enquiry', error });

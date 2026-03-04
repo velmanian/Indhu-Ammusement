@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { connectDB } from './lib/database';
+import { ensureDefaultAdmin } from './lib/seedAdmin';
 import authRoutes from './routes/auth.routes';
 import publicRoutes from './routes/public.routes';
 import adminRoutes from './routes/admin.routes';
@@ -14,10 +15,35 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Allowed CORS origins (local + deployed frontends)
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://indhu-ammusement.onrender.com",
+  // Allow configuring extra origins via env without code changes
+  process.env.CLIENT_URL || "",
+  process.env.CLIENT_URL_PROD || "",
+].filter(Boolean);
+
+// CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    credentials: true
+    origin: (origin, callback) => {
+      // Allow non-browser tools (no Origin header)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`), false);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 204,
   })
 );
 
@@ -27,7 +53,6 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-app.use(cors());
 app.use(express.json());
 
 // Serve uploaded images as static files
@@ -65,7 +90,10 @@ app.get('/health', (req, res) => {
 
 
 // Connect to MongoDB and start server
-connectDB().then(() => {
+connectDB().then(async () => {
+  // Ensure there is at least one admin user
+  await ensureDefaultAdmin();
+
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log('Test endpoint: http://localhost:5000/api/test');
