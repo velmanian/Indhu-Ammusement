@@ -18,18 +18,17 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
 
         const fallback = getFallbackData();
         const newProducts: any[] = [];
+        const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
 
         data.forEach((item, index) => {
-            const name = item.Name || item.name;
-            const slug = item.Slug || item.slug || name?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
+            // User's specific columns: Product Name, Category, Description, Price, Image Name, Dimensions, Material, Age Group, Installation, Warranty, Status
+            const name = item['Product Name'] || item.Name || item.name;
             if (!name) return;
 
             const categoryName = item.Category || item.category;
             let category = fallback.categories.find(c => c.name === categoryName);
 
             if (!category && categoryName) {
-                // Auto-create category if it doesn't exist in fallback
                 category = {
                     _id: 'offline_cat_' + Date.now() + index,
                     id: 'offline_cat_' + Date.now() + index,
@@ -39,13 +38,15 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
                 fallback.categories.push(category);
             }
 
-            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
-            const imageList = item.Images || item.images ? (String(item.Images || item.images)).split(',') : [];
-            const processedImages = imageList.map(img => {
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+            // Image handling (match from ZIP previously uploaded)
+            const imageName = item['Image Name'] || item.images || item.Images;
+            const processedImages = imageName ? (String(imageName)).split(',').map(img => {
                 const trimmed = img.trim();
                 if (trimmed.startsWith('http')) return trimmed;
                 return `${baseUrl}/uploads/${trimmed}`;
-            });
+            }) : [];
 
             const product = {
                 _id: 'bulk_' + Date.now() + index,
@@ -53,13 +54,19 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
                 name,
                 slug,
                 description: item.Description || item.description || '',
-                specifications: item.Specifications || item.specifications ? (() => {
-                    try { return JSON.parse(item.Specifications || item.specifications); }
-                    catch { return item.Specifications || item.specifications; }
-                })() : {},
+                price: item.Price || item.price,
                 images: processedImages,
                 categoryId: category?._id || '',
                 category: category || { name: 'Other', slug: 'other' },
+                specifications: {
+                    dimensions: item.Dimensions || item.dimensions,
+                    material: item.Material || item.material,
+                    ageGroup: item['Age Group'] || item.age_group,
+                    installation: item.Installation || item.installation,
+                    warranty: item.Warranty || item.warranty,
+                    status: item.Status || item.status || 'Active',
+                    price: item.Price || item.price // Store price in specs too for safety
+                },
                 createdAt: new Date().toISOString()
             };
 
@@ -70,7 +77,7 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
         saveFallbackData(fallback);
 
         res.json({
-            message: `Successfully imported ${newProducts.length} products`,
+            message: `Successfully imported ${newProducts.length} products. Existing products preserved.`,
             count: newProducts.length
         });
     } catch (error) {

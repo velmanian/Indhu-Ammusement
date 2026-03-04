@@ -28,6 +28,12 @@ export default function ProductModal({
     description: '',
     categoryId: '',
     specifications: '',
+    price: '',
+    dimensions: '',
+    material: '',
+    ageGroup: '',
+    installation: '',
+    warranty: '',
     images: [] as string[],
   });
 
@@ -56,11 +62,30 @@ export default function ProductModal({
               ? editingProduct.specifications
               : JSON.stringify(editingProduct.specifications, null, 2)
             : '',
+          price: editingProduct.specifications?.price || '',
+          dimensions: editingProduct.specifications?.dimensions || '',
+          material: editingProduct.specifications?.material || '',
+          ageGroup: editingProduct.specifications?.ageGroup || '',
+          installation: editingProduct.specifications?.installation || '',
+          warranty: editingProduct.specifications?.warranty || '',
           images: editingProduct.images || [],
         });
         setPreviewUrls(editingProduct.images || []);
       } else {
-        setFormData({ name: '', slug: '', description: '', categoryId: '', specifications: '', images: [] });
+        setFormData({
+          name: '',
+          slug: '',
+          description: '',
+          categoryId: '',
+          specifications: '',
+          price: '',
+          dimensions: '',
+          material: '',
+          ageGroup: '',
+          installation: '',
+          warranty: '',
+          images: [],
+        });
         setPreviewUrls([]);
       }
       setNewImageFiles([]);
@@ -118,12 +143,18 @@ export default function ProductModal({
       const productData = {
         ...formData,
         categoryId: formData.categoryId || undefined,
-        specifications: formData.specifications
-          ? (() => {
+        specifications: {
+          ...(formData.specifications ? (() => {
             try { return JSON.parse(formData.specifications); }
-            catch { return formData.specifications; }
-          })()
-          : undefined,
+            catch { return {}; }
+          })() : {}),
+          price: formData.price,
+          dimensions: formData.dimensions,
+          material: formData.material,
+          ageGroup: formData.ageGroup,
+          installation: formData.installation,
+          warranty: formData.warranty,
+        },
         images: serverUrls,
       };
 
@@ -233,18 +264,83 @@ export default function ProductModal({
                 />
               </div>
 
-              {/* Specifications */}
+              {/* Price & Dimensions */}
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+                <input
+                  type="text"
+                  value={formData.price}
+                  onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. 10000"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Dimensions</label>
+                <input
+                  type="text"
+                  value={formData.dimensions}
+                  onChange={e => setFormData(prev => ({ ...prev, dimensions: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. 6ft"
+                />
+              </div>
+
+              {/* Material & Age Group */}
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Material</label>
+                <input
+                  type="text"
+                  value={formData.material}
+                  onChange={e => setFormData(prev => ({ ...prev, material: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. FRP"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Age Group</label>
+                <input
+                  type="text"
+                  value={formData.ageGroup}
+                  onChange={e => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. 3-10 yrs"
+                />
+              </div>
+
+              {/* Installation & Warranty */}
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Installation</label>
+                <input
+                  type="text"
+                  value={formData.installation}
+                  onChange={e => setFormData(prev => ({ ...prev, installation: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. Yes"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Warranty</label>
+                <input
+                  type="text"
+                  value={formData.warranty}
+                  onChange={e => setFormData(prev => ({ ...prev, warranty: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                  placeholder="e.g. 1 Year"
+                />
+              </div>
+
+              {/* Specifications (Hidden Advanced) */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Specifications{' '}
-                  <span className="text-gray-400 font-normal">(JSON, optional)</span>
+                  Additional Specs <span className="text-gray-400 font-normal">(JSON, optional)</span>
                 </label>
                 <textarea
                   value={formData.specifications}
                   onChange={e => setFormData(prev => ({ ...prev, specifications: e.target.value }))}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition font-mono text-sm resize-none"
-                  placeholder='{"material": "FRP", "capacity": "20 people"}'
+                  rows={2}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition font-mono text-xs resize-none"
+                  placeholder='{"Other": "Info"}'
                 />
               </div>
             </div>

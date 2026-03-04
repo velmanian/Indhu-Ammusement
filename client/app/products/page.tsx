@@ -19,6 +19,8 @@ interface Product {
     name: string;
     slug: string;
   };
+  specifications?: any;
+  price?: number | string;
 }
 
 interface Category {
@@ -224,8 +226,29 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
         {product.description && (
           <p className="text-gray-500 text-xs sm:text-sm mt-2 line-clamp-2">{product.description}</p>
         )}
+
+        {/* Specifications snippet */}
+        {product.specifications && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {product.specifications.material && (
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
+                {product.specifications.material}
+              </span>
+            )}
+            {product.specifications.dimensions && (
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
+                {product.specifications.dimensions}
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
-          <span className="text-brand-primary font-bold text-sm">Price on Enquiry</span>
+          <span className="text-brand-primary font-bold text-sm">
+            {product.price || product.specifications?.price
+              ? `₹${product.price || product.specifications?.price}`
+              : 'Price on Enquiry'}
+          </span>
           <button
             onClick={() => {
               const url = new URL(window.location.origin + '/contact');

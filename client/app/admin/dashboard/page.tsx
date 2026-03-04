@@ -188,7 +188,7 @@ export default function AdminDashboard() {
     setBulkLoading(true);
     try {
       const res = await bulkUploadZip(file);
-      alert(res.message);
+      alert(res.message + "\n\nNow you can upload your Excel file to link these images to products.");
     } catch (error) {
       console.error('ZIP upload error:', error);
       alert('Failed to upload ZIP file');
@@ -196,6 +196,22 @@ export default function AdminDashboard() {
       setBulkLoading(false);
       if (zipInputRef.current) zipInputRef.current.value = '';
     }
+  };
+
+  const downloadTemplate = () => {
+    const headers = ['Product Name', 'Category', 'Description', 'Price', 'Image Name', 'Dimensions', 'Material', 'Age Group', 'Installation', 'Warranty', 'Status'];
+    const sampleRow = ['Kids Slide', 'Slides', 'Outdoor playground slide', '10000', 'slide1.jpg', '6ft', 'FRP', '3–10 yrs', 'Yes', '1 Year', 'Active'];
+    const csvContent = [headers.join(','), sampleRow.join(',')].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'products_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleAddProduct = async (productData: any) => {
@@ -346,17 +362,24 @@ export default function AdminDashboard() {
                   onClick={() => excelInputRef.current?.click()}
                   disabled={bulkLoading}
                   className="bg-green-600 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition disabled:opacity-50 text-xs sm:text-sm"
-                  title="Upload products via Excel"
+                  title="Step 2: Upload products via Excel"
                 >
-                  <FileUp size={18} /> Bulk Products
+                  <FileUp size={18} /> 2. Upload Excel
                 </button>
                 <button
                   onClick={() => zipInputRef.current?.click()}
                   disabled={bulkLoading}
                   className="bg-orange-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-orange-600 transition disabled:opacity-50 text-xs sm:text-sm"
-                  title="Upload images via ZIP"
+                  title="Step 1: Upload images via ZIP"
                 >
-                  <FileArchive size={18} /> Bulk Images
+                  <FileArchive size={18} /> 1. Upload ZIP
+                </button>
+                <button
+                  onClick={downloadTemplate}
+                  className="bg-gray-100 text-gray-700 px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-gray-200 transition text-xs sm:text-sm"
+                  title="Download Excel Template"
+                >
+                  <FileUp size={18} className="rotate-180" /> Template
                 </button>
                 <button
                   onClick={openAddModal}
