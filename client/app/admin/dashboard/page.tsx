@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { fetchAdmin, createProduct, updateProduct, deleteProduct, updateEnquiryStatus, deleteEnquiry } from '@/lib/adminApi';
+import { useState, useEffect, useRef } from 'react';
+import { fetchAdmin, createProduct, updateProduct, deleteProduct, updateEnquiryStatus, deleteEnquiry, bulkUploadExcel, bulkUploadZip } from '@/lib/adminApi';
 import { Enquiry, Product, Category } from '@/types';
-import { LayoutDashboard, ShoppingBag, MessageSquare, LogOut, Loader2, Plus, Edit, Trash2 } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, MessageSquare, LogOut, Loader2, Plus, Edit, Trash2, FileUp, FileArchive, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ProductModal from '@/components/ProductModal';
 
@@ -13,11 +13,16 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'enquiries' | 'products'>('enquiries');
+  const [viewType, setViewType] = useState<'grid' | 'table'>('grid');
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'RESPONDED' | 'CLOSED'>('ALL');
   const [selectedEnquiries, setSelectedEnquiries] = useState<number[]>([]);
+  const [productSearch, setProductSearch] = useState('');
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const excelInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -131,10 +136,66 @@ export default function AdminDashboard() {
     statusFilter === 'ALL' || enq.status === statusFilter
   );
 
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+    product.category?.name?.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     router.push('/admin/login');
+  };
+
+  const refreshData = async () => {
+    setLoading(true);
+    try {
+      const [enqData, prodData, catData] = await Promise.all([
+        fetchAdmin('/enquiries'),
+        fetchAdmin('/products'),
+        fetchAdmin('/categories')
+      ]);
+      setEnquiries(enqData);
+      setProducts(prodData);
+      setCategories(catData);
+    } catch (err) {
+      console.error('Error refreshing data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBulkLoading(true);
+    try {
+      const res = await bulkUploadExcel(file);
+      alert(res.message);
+      await refreshData();
+    } catch (error) {
+      console.error('Excel upload error:', error);
+      alert('Failed to upload Excel file');
+    } finally {
+      setBulkLoading(false);
+      if (excelInputRef.current) excelInputRef.current.value = '';
+    }
+  };
+
+  const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBulkLoading(true);
+    try {
+      const res = await bulkUploadZip(file);
+      alert(res.message);
+    } catch (error) {
+      console.error('ZIP upload error:', error);
+      alert('Failed to upload ZIP file');
+    } finally {
+      setBulkLoading(false);
+      if (zipInputRef.current) zipInputRef.current.value = '';
+    }
   };
 
   const handleAddProduct = async (productData: any) => {
@@ -245,12 +306,72 @@ export default function AdminDashboard() {
               </>
             )}
             {activeTab === 'products' && (
-              <button
-                onClick={openAddModal}
-                className="bg-blue-900 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-800 transition"
-              >
-                <Plus size={20} /> Add Product
-              </button>
+              <div className="flex flex-wrap gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
+                />
+                <div className="bg-gray-100 p-1 rounded-xl flex mr-2">
+                  <button
+                    onClick={() => setViewType('grid')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewType === 'grid' ? 'bg-white shadow-sm text-blue-900' : 'text-gray-500 hover:bg-gray-200'}`}
+                  >
+                    Grid
+                  </button>
+                  <button
+                    onClick={() => setViewType('table')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewType === 'table' ? 'bg-white shadow-sm text-blue-900' : 'text-gray-500 hover:bg-gray-200'}`}
+                  >
+                    Table
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  ref={excelInputRef}
+                  onChange={handleExcelUpload}
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                />
+                <input
+                  type="file"
+                  ref={zipInputRef}
+                  onChange={handleZipUpload}
+                  accept=".zip"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => excelInputRef.current?.click()}
+                  disabled={bulkLoading}
+                  className="bg-green-600 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition disabled:opacity-50 text-xs sm:text-sm"
+                  title="Upload products via Excel"
+                >
+                  <FileUp size={18} /> Bulk Products
+                </button>
+                <button
+                  onClick={() => zipInputRef.current?.click()}
+                  disabled={bulkLoading}
+                  className="bg-orange-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-orange-600 transition disabled:opacity-50 text-xs sm:text-sm"
+                  title="Upload images via ZIP"
+                >
+                  <FileArchive size={18} /> Bulk Images
+                </button>
+                <button
+                  onClick={openAddModal}
+                  className="bg-blue-900 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-800 transition text-xs sm:text-sm"
+                >
+                  <Plus size={18} /> Add Product
+                </button>
+                <button
+                  onClick={refreshData}
+                  className="bg-gray-200 text-gray-700 p-2 rounded-xl hover:bg-gray-300 transition"
+                  title="Refresh Data"
+                >
+                  <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -414,14 +535,14 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {products.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <div className="col-span-full text-center py-20">
                 <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-400 font-medium">No products yet</p>
-                <p className="text-gray-400 text-sm mt-1">Click "Add Product" to get started</p>
+                <p className="text-gray-400 font-medium">No products found</p>
+                <p className="text-gray-400 text-sm mt-1">Try a different search or add a new product</p>
               </div>
-            ) : (
-              products.map(product => (
+            ) : viewType === 'grid' ? (
+              filteredProducts.map(product => (
                 <div key={(product as any)._id || product.id} className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition">
                   <div className="flex gap-4">
                     <div className="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0">
@@ -463,6 +584,56 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))
+            ) : (
+              <div className="col-span-full bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Slug</th>
+                        <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredProducts.map(product => (
+                        <tr key={(product as any)._id || product.id} className="hover:bg-gray-50 transition">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                {product.images?.[0] ? (
+                                  <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="h-full w-full flex items-center justify-center text-[10px] text-gray-400">No Img</div>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-bold text-gray-900">{product.name}</div>
+                                <div className="text-xs text-gray-500 truncate max-w-[200px]">{product.description || 'No description'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-bold">
+                              {product.category?.name || 'Uncategorized'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-400 font-mono">
+                            {product.slug}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex justify-end gap-3">
+                              <button onClick={() => openEditModal(product)} className="text-blue-900 hover:text-blue-700"><Edit size={18} /></button>
+                              <button onClick={() => handleDeleteProduct(product)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
           </div>
         )}

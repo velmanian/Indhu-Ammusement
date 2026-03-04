@@ -13,6 +13,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "adm-zip": "^0.5.16",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -21,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.8.3",
     "multer": "^2.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -83,3 +83,29 @@ export const getSingleEnquiry = async (enquiryId: number) => {
   if (!res.ok) throw new Error('Failed to fetch enquiry');
   return res.json();
 };
+
+export const bulkUploadExcel = async (file: File) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_URL}/admin/bulk-products`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+  if (!res.ok) throw new Error('Excel upload failed');
+  return res.json();
+};
+
+export const bulkUploadZip = async (file: File) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_URL}/admin/bulk-images`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+  if (!res.ok) throw new Error('ZIP upload failed');
+  return res.json();
+};

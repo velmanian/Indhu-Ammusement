@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductModel } from '../models/Product';
 import { CategoryModel } from '../models/Category';
+import { getFallbackData, addFallbackProduct } from '../lib/fallbackDb';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
@@ -18,8 +19,15 @@ export const getProducts = async (req: Request, res: Response) => {
       const products = await ProductModel.find(query).populate('categoryId', 'name slug description image');
       res.json(products);
     } catch (dbError) {
-      console.warn('Database is offline, returning empty products list');
-      res.json([]);
+      console.warn('Database is offline, returning fallback products list');
+      const fallback = getFallbackData();
+      let products = fallback.products;
+
+      if (category) {
+        products = products.filter(p => p.category?.slug === category || p.categoryId === category);
+      }
+
+      res.json(products);
     }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products', error });
@@ -29,9 +37,23 @@ export const getProducts = async (req: Request, res: Response) => {
 export const getProductBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
-    const product = await ProductModel.findOne({ slug: slug as string }).populate('categoryId', 'name slug description image');
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
+    try {
+      const product = await ProductModel.findOne({ slug: slug as string }).populate('categoryId', 'name slug description image');
+      if (!product) {
+        // If not in DB, maybe it's in our fallback?
+        const fallback = getFallbackData();
+        const fProduct = fallback.products.find(p => p.slug === slug);
+        if (fProduct) return res.json(fProduct);
+        return res.status(404).json({ message: 'Product not found' });
+      }
+      res.json(product);
+    } catch (dbError) {
+      console.warn('Database is offline, searching fallback for slug:', slug);
+      const fallback = getFallbackData();
+      const product = fallback.products.find(p => p.slug === slug);
+      if (!product) return res.status(404).json({ message: 'Product not found in fallback' });
+      res.json(product);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching product', error });
   }
@@ -45,9 +67,22 @@ export const createProduct = async (req: Request, res: Response) => {
     try {
       await product.save();
     } catch (dbError) {
-      console.warn('Database is offline, simulating product creation');
-      // Assign a fake ID so the frontend doesn't crash on redirect/listing
-      (product as any)._id = 'offline_' + Date.now();
+      console.warn('Database is offline, persisting product to local fallback');
+      // Assign a fake ID so the frontend doesn't crash
+      const fakeId = 'offline_' + Date.now();
+      (product as any)._id = fakeId;
+      (product as any).id = fakeId;
+
+      // Try to find category info for the fallback
+      const fallback = getFallbackData();
+      const category = fallback.categories.find(c => c._id === categoryId || c.id === categoryId);
+
+      addFallbackProduct({
+        ...req.body,
+        _id: fakeId,
+        id: fakeId,
+        category: category || { name: 'Other', slug: 'other' }
+      });
     }
 
     res.status(201).json(product);

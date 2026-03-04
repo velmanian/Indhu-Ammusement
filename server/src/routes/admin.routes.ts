@@ -5,6 +5,7 @@ import fs from 'fs';
 import { createProduct, updateProduct, deleteProduct, getProducts as adminGetProducts } from '../controllers/product.controller';
 import { createCategory, getCategories } from '../controllers/category.controller';
 import { getEnquiries, updateEnquiryStatus, getEnquiryById } from '../controllers/enquiry.controller';
+import { bulkUploadProducts, bulkUploadImages } from '../controllers/bulk.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -21,6 +22,8 @@ const storage = multer.diskStorage({
     },
 });
 
+const memoryStorage = multer.memoryStorage();
+
 const upload = multer({
     storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
@@ -29,6 +32,8 @@ const upload = multer({
         else cb(new Error('Only image files are allowed'));
     },
 });
+
+const memoryUpload = multer({ storage: memoryStorage });
 
 router.use(authenticateToken);
 
@@ -55,5 +60,9 @@ router.post('/categories', createCategory);
 router.get('/enquiries', getEnquiries);
 router.get('/enquiries/:id', getEnquiryById);
 router.put('/enquiries/:id', updateEnquiryStatus);
+
+// Bulk Uploads
+router.post('/bulk-products', memoryUpload.single('file'), bulkUploadProducts);
+router.post('/bulk-images', memoryUpload.single('file'), bulkUploadImages);
 
 export default router;
