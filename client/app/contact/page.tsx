@@ -25,7 +25,11 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="text-xl font-bold mb-1 text-brand-navy">Our Location</h4>
-                    <p className="text-gray-600">Tirunelveli, Tamil Nadu, India</p>
+                    <p className="text-gray-600">
+                      No1, Railway Feeder road,<br />
+                      Maharaja Nagar,<br />
+                      Tirunelveli, India, 627011
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
@@ -34,7 +38,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="text-xl font-bold mb-1 text-brand-navy">Phone Number</h4>
-                    <p className="text-gray-600">+91 98765 43210</p>
+                    <p className="text-gray-600">093823 08899</p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
@@ -43,7 +47,16 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="text-xl font-bold mb-1 text-brand-navy">Email Address</h4>
-                    <p className="text-gray-600">info@indhu.com</p>
+                    <p className="text-gray-600">indhuamusement123@gmail.com</p>
+                  </div>
+                </div>
+                <div className="flex gap-6 items-start">
+                  <div className="bg-brand-light text-brand-accent p-4 rounded-2xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Proprietor</h4>
+                    <p className="text-gray-600">JEYAMANI BABU</p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
@@ -81,11 +94,19 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Map Placeholder */}
-      <section className="h-96 bg-gray-200">
-        <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">
-          [ Google Maps Integration Placeholder ]
-        </div>
+      {/* Map Implementation */}
+      <section className="h-[400px] sm:h-[500px] w-full border-t border-gray-100">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3943.832869427898!2d77.74251187477662!3d8.70741629134165!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0413070faac21f%3A0x6cb1243862b2327e!2sIndhu%20Play%20Equipment%20Manufacturer!5e0!3m2!1sen!2sin!4v1773481525021!5m2!1sen!2sin"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen={true}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Indhu Amusement Ride Industries Location"
+          className="w-full h-full grayscale hover:grayscale-0 transition-all duration-700"
+        ></iframe>
       </section>
     </div>
   );

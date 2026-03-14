@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Logo from './Logo';
-import { MapPin, Mail, Phone } from 'lucide-react';
+import { MapPin, Mail, Phone, Instagram, Facebook, Link as LinkIcon, Briefcase } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -26,22 +26,37 @@ export default function Footer() {
           <div className="space-y-2 text-white/80 text-sm">
             <div className="flex items-center">
               <MapPin size={14} className="mr-2 text-brand-accent" />
-              <span>Tirunelveli, Tamil Nadu</span>
+              <span>No1, Railway Feeder road,
+                Maharaja Nagar,
+                Tirunelveli, India, 627011</span>
             </div>
             <div className="flex items-center">
               <Mail size={14} className="mr-2 text-brand-accent" />
-              <span>info@indhu.com</span>
+              <span>indhuamusement123@gmail.com</span>
             </div>
             <div className="flex items-center">
               <Phone size={14} className="mr-2 text-brand-accent" />
-              <span>+91 98765 43210</span>
+              <span>+91 9382308899</span>
             </div>
           </div>
         </div>
         <div>
           <h4 className="text-md font-semibold mb-3 text-brand-accent">Hours</h4>
           <p className="text-white/80 text-sm">Mon - Sat: 9:00 AM - 7:00 PM</p>
-          <p className="text-white/80 text-sm mt-1">Sunday: Closed</p>
+          <p className="text-white/80 text-sm mt-1 mb-6">Sunday: Closed</p>
+
+          <h4 className="text-md font-semibold mb-3 text-brand-accent">Follow Us</h4>
+          <div className="flex gap-4 items-center">
+            <a href="https://www.instagram.com/indhuamusementride/" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white hover:scale-110 transition-transform" aria-label="Instagram">
+              <Instagram size={20} />
+            </a>
+            <a href="https://www.facebook.com/p/Indhu-Amusement-Rides-100071764077150/" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white hover:scale-110 transition-transform" aria-label="Facebook">
+              <Facebook size={20} />
+            </a>
+            <a href="https://bni-tirunelveli.in/tirunelveli-cmy-veli/en-IN/memberdetails?encryptedMemberId=KPZAM2s6IJl6HGNGEwH%2BgA%3D%3D&name=Babu+Jeyamani" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-brand-accent hover:scale-110 transition-transform" aria-label="BNI Profile" title="View BNI Profile">
+              <span className="font-bold border border-white/80 rounded px-1.5 py-0.5 text-[10px] leading-none tracking-widest hover:border-brand-accent">BNI</span>
+            </a>
+          </div>
         </div>
       </div>
       <div className="mt-6 sm:mt-8 border-t border-white/10 pt-4 sm:pt-6 text-center text-white/40 text-xs">

@@ -380,46 +380,61 @@ export default function About() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-24 font-body bg-white">
+      {/* LEADERSHIP SECTION */}
+      <section className="py-24 font-body" style={{ background: "#eef4fb" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <p className="section-label">Client Voices</p>
+          <div className="text-center mb-16">
+            <p className="section-label">Leadership</p>
             <div className="gold-line mx-auto"></div>
             <h2
               className="font-display font-bold brand-navy"
               style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
             >
-              What Our Customers Say
+              The Vision Behind the Brand
             </h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto text-sm leading-relaxed">
-              From Smart City parks to five-star resort kids zones — our work speaks through the
-              satisfaction of those we've served.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="testimonial-card bg-white rounded-2xl p-8 shadow-md relative overflow-hidden"
-              >
-                <span className="quote-mark">"</span>
-                <div className="relative z-10">
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block ${typeColors[t.type]}`}
-                  >
-                    {t.type}
-                  </span>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-6 mt-2">"{t.quote}"</p>
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="font-semibold brand-navy text-sm">{t.name}</p>
-                    <p className="text-gray-400 text-xs mt-0.5">{t.title}</p>
-                    <p className="brand-accent text-xs font-medium mt-2">📍 {t.project}</p>
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-brand-primary/10">
+            {/* Image Side */}
+            <div className="w-full md:w-2/5 bg-brand-navy p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+              <div className="absolute -top-24 -left-24 w-48 h-48 bg-brand-primary/40 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-brand-accent/40 rounded-full blur-3xl"></div>
+
+              <div className="relative z-10">
+                <div className="w-32 h-32 bg-white rounded-full mx-auto mb-6 shadow-xl border-4 border-brand-accent/30 flex items-center justify-center p-2">
+                  {/* Placeholder for proprietor image if they want one later */}
+                  <div className="w-full h-full bg-brand-light rounded-full flex items-center justify-center">
+                    <span className="text-brand-primary font-display font-bold text-4xl">JB</span>
                   </div>
                 </div>
+                <h3 className="font-display font-bold text-white text-3xl mb-1">Jeyamani Babu</h3>
+                <p className="text-brand-accent font-medium tracking-wider uppercase text-sm mb-4">Proprietor</p>
+                <a
+                  href="https://bni-tirunelveli.in/tirunelveli-cmy-veli/en-IN/memberdetails?encryptedMemberId=KPZAM2s6IJl6HGNGEwH%2BgA%3D%3D&name=Babu+Jeyamani"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-xs tracking-wide transition-colors border border-white/20"
+                >
+                  View BNI Profile
+                </a>
               </div>
-            ))}
+            </div>
+
+            {/* Content Side */}
+            <div className="w-full md:w-3/5 p-8 md:p-12 flex flex-col justify-center">
+              <div className="text-brand-accent mb-6">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6 font-medium">
+                "Our goal has always been simple: to create environments where children can play safely and communities can thrive. At Indhu Amusement Ride Industries, we don't just manufacture equipment; we engineer joy, ensuring every product reflects our commitment to uncompromising quality and enduring durability."
+              </p>
+              <div className="border-t border-gray-100 pt-6">
+                <p className="font-bold brand-navy">Indhu Play Equipment Manufacturer</p>
+                <p className="text-gray-500 text-sm mt-1">Tirunelveli, Tamil Nadu</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
