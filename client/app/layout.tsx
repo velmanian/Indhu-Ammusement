@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "Indhu Amusement Ride Industries | Manufacturer of Playground & Park Equipment",
   description: "High-quality FRP slides, swings, outdoor gym equipment, and more for parks and schools.",
   viewport: "width=device-width, initial-scale=1.0",
+  verification: {
+    google: "PPAzKbVE5ErjwfuZ6XvKokLVld2Tb4Z1YJQErpHZVwk",
+  },
 };
 
 export default function RootLayout({
