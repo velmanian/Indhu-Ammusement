@@ -76,24 +76,24 @@ export default function Gallery() {
                 </div>
 
                 {/* Filters */}
-                <div className="flex flex-col md:flex-row gap-6 mb-12 items-center justify-between">
-                    <div className="relative w-full md:max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <div className="flex flex-col gap-8 mb-16">
+                    <div className="relative w-full max-w-2xl mx-auto">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
                             placeholder="Search products by name..."
-                            className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm transition-all"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary bg-white shadow-sm transition-all text-lg"
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                    <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center">
                         <button
                             onClick={() => setSelectedCategory('all')}
-                            className={`px-6 py-2.5 rounded-full font-bold transition-all whitespace-nowrap shadow-sm ${selectedCategory === 'all'
-                                ? 'bg-brand-primary text-white scale-105'
-                                : 'bg-white text-brand-navy hover:bg-gray-50 border border-gray-100'
+                            className={`px-6 py-3 rounded-2xl font-black text-sm transition-all whitespace-nowrap shadow-sm border ${selectedCategory === 'all'
+                                ? 'bg-brand-primary border-brand-primary text-white scale-105'
+                                : 'bg-white text-brand-navy border-gray-100 hover:border-brand-primary/30'
                                 }`}
                         >
                             All Categories
@@ -102,9 +102,9 @@ export default function Gallery() {
                             <button
                                 key={cat.id || (cat as any)._id}
                                 onClick={() => setSelectedCategory(cat.slug)}
-                                className={`px-6 py-2.5 rounded-full font-bold transition-all whitespace-nowrap shadow-sm ${selectedCategory === cat.slug
-                                    ? 'bg-brand-primary text-white scale-105'
-                                    : 'bg-white text-brand-navy hover:bg-gray-50 border border-gray-100'
+                                className={`px-6 py-3 rounded-2xl font-black text-sm transition-all whitespace-nowrap shadow-sm border ${selectedCategory === cat.slug
+                                    ? 'bg-brand-primary border-brand-primary text-white scale-105'
+                                    : 'bg-white text-brand-navy border-gray-100 hover:border-brand-primary/30'
                                     }`}
                             >
                                 {cat.name}
@@ -130,20 +130,20 @@ export default function Gallery() {
                         <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
                         {filteredImages.map((img, index) => (
                             <div
                                 key={`${img.productId}-${index}`}
-                                className="group relative aspect-square bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
+                                className="group relative aspect-square bg-white rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
                             >
-                                {/* Background Glassmorphism Blur */}
-                                <div className="absolute inset-0 bg-white/20 backdrop-blur-3xl z-0"></div>
+                                {/* Background Glow */}
+                                <div className="absolute inset-0 bg-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                                 {/* Image */}
                                 <img
                                     src={img.url}
                                     alt={img.productName}
-                                    className="w-full h-full object-contain p-6 relative z-10 group-hover:scale-110 transition-transform duration-700"
+                                    className="w-full h-full object-contain p-4 sm:p-6 relative z-10 group-hover:scale-110 transition-transform duration-700"
                                     loading="lazy"
                                     onError={e => {
                                         (e.target as HTMLImageElement).src = '/placeholder-image.png';
@@ -151,26 +151,33 @@ export default function Gallery() {
                                 />
 
                                 {/* Overlay on Hover */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/90 via-brand-navy/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end p-8">
+                                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/90 via-brand-navy/40 to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end p-4 sm:p-8">
                                     <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                        <span className="text-brand-accent text-xs font-black uppercase tracking-widest mb-2 block">
+                                        <span className="text-brand-accent text-[10px] sm:text-xs font-black uppercase tracking-widest mb-1 sm:mb-2 block">
                                             {img.categoryName}
                                         </span>
-                                        <h3 className="text-white text-2xl font-black leading-tight mb-4">
+                                        <h3 className="text-white text-base sm:text-2xl font-black leading-tight mb-2 sm:mb-4 line-clamp-2">
                                             {img.productName}
                                         </h3>
                                         <a
                                             href={`/enquiry?productId=${img.productId}`}
-                                            className="inline-flex items-center gap-2 bg-white text-brand-navy px-5 py-2.5 rounded-xl font-black text-sm hover:bg-brand-accent transition-colors"
+                                            className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-accent transition-colors"
                                         >
                                             Enquire Now
                                         </a>
                                     </div>
                                 </div>
 
-                                {/* Always visible category tag (mobile optimization) */}
-                                <div className="absolute top-4 left-4 z-10 lg:group-hover:opacity-0 transition-opacity">
-                                    <span className="bg-brand-primary text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                                {/* Mobile info snippet (Instead of full hover overlay) */}
+                                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent sm:hidden z-15">
+                                    <h3 className="text-white text-[10px] font-bold truncate leading-tight">
+                                        {img.productName}
+                                    </h3>
+                                </div>
+
+                                {/* Always visible category tag */}
+                                <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20">
+                                    <span className="bg-brand-primary text-white text-[8px] sm:text-[10px] font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
                                         {img.categoryName}
                                     </span>
                                 </div>

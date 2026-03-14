@@ -4,89 +4,102 @@ import ContactForm from '@/components/ContactForm';
 export default function Contact() {
   return (
     <div className="bg-white">
-      <section className="bg-brand-primary text-white py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4">Contact Us</h1>
-          <p className="text-lg sm:text-xl text-brand-light max-w-2xl mx-auto opacity-90 px-4">
-            Have questions? We are here to help you build the perfect play area.
+      <section className="bg-brand-navy text-white py-20 sm:py-32 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center sm:text-left">
+          <h1 className="text-4xl sm:text-7xl font-black mb-6 leading-tight">
+            Let's Start a <br />
+            <span className="text-brand-accent">Conversation</span>
+          </h1>
+          <p className="text-lg sm:text-2xl text-white/70 max-w-2xl sm:mx-0 mx-auto leading-relaxed">
+            Have questions about our equipment or need a custom quote? Our engineering team is ready to help you build the perfect play area.
           </p>
         </div>
       </section>
 
-      <section className="py-16 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
-            <div>
-              <h2 className="text-3xl font-bold text-brand-navy mb-8">Get In Touch</h2>
-              <div className="space-y-8">
-                <div className="flex gap-6 items-start">
-                  <div className="bg-brand-light text-brand-primary p-4 rounded-2xl">
-                    <MapPin size={28} />
+      <section className="py-16 sm:py-24 bg-brand-light/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+            <div className="space-y-10">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-black text-brand-navy mb-10 flex items-center gap-4">
+                  Contact Information
+                  <div className="h-1 flex-grow bg-brand-navy/10 rounded-full hidden sm:block"></div>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                  <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-12 h-12 bg-brand-navy text-white rounded-2xl flex items-center justify-center group-hover:bg-brand-primary transition-colors">
+                      <MapPin size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-brand-navy uppercase tracking-widest mb-2">Our Location</h4>
+                      <p className="text-gray-500 text-sm leading-relaxed">
+                        No1, Railway Feeder road, Maharaja Nagar, Tirunelveli, 627011
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Our Location</h4>
-                    <p className="text-gray-600">
-                      No1, Railway Feeder road,<br />
-                      Maharaja Nagar,<br />
-                      Tirunelveli, India, 627011
-                    </p>
+
+                  <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-12 h-12 bg-brand-navy text-white rounded-2xl flex items-center justify-center group-hover:bg-brand-primary transition-colors">
+                      <Phone size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-brand-navy uppercase tracking-widest mb-2">Call Us</h4>
+                      <p className="text-gray-500 text-sm font-bold">+91 93823 08899</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-6 items-start">
-                  <div className="bg-brand-accent/20 text-brand-navy p-4 rounded-2xl">
-                    <Phone size={28} />
+
+                  <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-12 h-12 bg-brand-navy text-white rounded-2xl flex items-center justify-center group-hover:bg-brand-primary transition-colors">
+                      <Mail size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-brand-navy uppercase tracking-widest mb-2">Email</h4>
+                      <p className="text-gray-500 text-sm break-all font-medium">indhuamusement123@gmail.com</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Phone Number</h4>
-                    <p className="text-gray-600">093823 08899</p>
-                  </div>
-                </div>
-                <div className="flex gap-6 items-start">
-                  <div className="bg-brand-light text-brand-secondary p-4 rounded-2xl">
-                    <Mail size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Email Address</h4>
-                    <p className="text-gray-600">indhuamusement123@gmail.com</p>
-                  </div>
-                </div>
-                <div className="flex gap-6 items-start">
-                  <div className="bg-brand-light text-brand-accent p-4 rounded-2xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Proprietor</h4>
-                    <p className="text-gray-600">JEYAMANI BABU</p>
-                  </div>
-                </div>
-                <div className="flex gap-6 items-start">
-                  <div className="bg-brand-light text-brand-navy p-4 rounded-2xl">
-                    <Clock size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1 text-brand-navy">Business Hours</h4>
-                    <p className="text-gray-600">Mon - Sat: 09:00 AM - 07:00 PM</p>
+
+                  <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-12 h-12 bg-brand-navy text-white rounded-2xl flex items-center justify-center group-hover:bg-brand-primary transition-colors">
+                      <Clock size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-brand-navy uppercase tracking-widest mb-2">Hours</h4>
+                      <p className="text-gray-500 text-sm font-medium">Mon - Sat: 9 AM - 7 PM</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 sm:mt-12 bg-brand-light p-6 sm:p-8 rounded-3xl border border-gray-100 border-l-4 sm:border-l-8 border-l-brand-accent">
-                <p className="text-brand-navy font-medium italic">"We take pride in our quick response time and dedicated customer service. Reach out to us for a custom quote today!"</p>
+              <div className="bg-brand-navy text-white p-8 sm:p-12 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/20 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2"></div>
+                <p className="text-lg sm:text-xl font-display italic relative z-10 leading-relaxed">
+                  "We take pride in our precision engineering and dedicated customer service. Reach out to us for a world-class solution today."
+                </p>
+                <div className="mt-8 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-brand-navy font-black">JB</div>
+                  <div>
+                    <p className="font-black text-sm uppercase tracking-widest">Jeyamani Babu</p>
+                    <p className="text-white/50 text-xs">Proprietor, Indhu Industries</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div>
-              <div className="bg-white p-8 sm:p-12 rounded-[32px] shadow-[0_32px_120px_-20px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-brand-light text-brand-primary rounded-2xl flex items-center justify-center mb-6">
-                  <Mail size={32} />
+            <div className="lg:sticky lg:top-32 lg:pt-0 pt-8">
+              <div className="bg-white p-8 sm:p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-gray-50 flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-brand-light text-brand-primary rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
+                  <Mail size={36} />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-brand-navy mb-4">Product Enquiries</h2>
-                <p className="text-gray-500 mb-10 max-w-sm">Use our dedicated professional enquiry portal to get a custom quote for your project.</p>
+                <h2 className="text-3xl font-black text-brand-navy mb-4">Project Enquiry</h2>
+                <p className="text-gray-500 mb-10 max-w-xs leading-relaxed">Use our professional enquiry portal to get a detailed custom quote for your specific site requirements.</p>
                 <a
                   href="/enquiry"
-                  className="w-full py-5 px-8 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-brand-primary/20 hover:bg-brand-navy transition-all"
+                  className="w-full py-5 px-8 bg-brand-navy text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-brand-navy/30 hover:bg-brand-primary transition-all active:scale-95"
                 >
-                  Submit Form for Enquiry
+                  Go to Enquiry Portal
                 </a>
               </div>
             </div>

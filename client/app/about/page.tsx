@@ -193,20 +193,19 @@ export default function About() {
       `}</style>
 
       {/* HERO */}
-      <section className="hero-bg text-white py-28 pb-32 font-body">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
+      <section className="hero-bg text-white py-20 sm:py-32 pb-24 sm:pb-36 font-body">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center sm:text-left">
+          <div className="max-w-4xl">
             <p className="section-label" style={{ color: "#fcd34d" }}>Our Story</p>
             <h1
-              className="font-display mb-6"
-              style={{ fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 700, lineHeight: 1.1 }}
+              className="font-display mb-8"
+              style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 700, lineHeight: 1.1 }}
             >
-              Crafting Joyful Spaces <br />
-              <span style={{ color: "#f59e0b" }}>Since a Decade</span>
+              Crafting <span style={{ color: "#f59e0b" }}>Joyful Spaces</span> <br />
+              Across India
             </h1>
             <p
-              className="text-brand-light opacity-85 max-w-xl mx-auto leading-relaxed"
-              style={{ fontSize: "1.1rem" }}
+              className="text-brand-light opacity-90 max-w-xl sm:mx-0 mx-auto leading-relaxed text-base sm:text-lg"
             >
               From government parks to luxury resorts — Indhu Industries has built India's most trusted name in FRP amusement equipment, one joyful installation at a time.
             </p>
@@ -215,21 +214,21 @@ export default function About() {
       </section>
 
       {/* STATS BAND */}
-      <section className="py-16 font-body" style={{ background: "#fff" }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <section className="py-12 sm:py-20 font-body relative -mt-16 sm:-mt-24 z-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="stat-card bg-white rounded-2xl p-8 text-center shadow-sm"
+                className="stat-card bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center shadow-2xl border border-gray-100"
               >
                 <p
-                  className="font-display font-bold brand-accent"
-                  style={{ fontSize: "3rem", lineHeight: 1 }}
+                  className="font-display font-bold brand-accent mb-1 sm:mb-2"
+                  style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1 }}
                 >
                   {s.value}
                 </p>
-                <p className="text-gray-500 mt-2 text-sm font-medium">{s.label}</p>
+                <p className="text-gray-400 text-[10px] sm:text-sm font-black uppercase tracking-widest">{s.label}</p>
               </div>
             ))}
           </div>
@@ -309,45 +308,41 @@ export default function About() {
       </section>
 
       {/* MISSION & VISION */}
-      <section className="py-20 font-body bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+      <section className="py-20 sm:py-32 font-body bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16 sm:mb-24">
             <p className="section-label">What Drives Us</p>
             <div className="gold-line mx-auto"></div>
             <h2
               className="font-display font-bold brand-navy"
-              style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
+              style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
             >
-              Mission & Vision
+              Mission & <span className="text-brand-accent">Vision</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 border-t-4 border-t-brand-primary">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
+            <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-xl border border-gray-50 border-t-8 border-t-brand-primary">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-white font-bold text-xl"
-                style={{ background: "#1a5c96" }}
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white font-bold text-2xl"
+                style={{ background: "linear-gradient(135deg, #1a5c96, #0d2b45)" }}
               >
                 🎯
               </div>
-              <h3 className="font-display text-2xl font-bold brand-navy mb-4">Our Mission</h3>
-              <p className="text-gray-600 leading-relaxed">
-                To provide high-quality, safe, and engaging amusement equipment that inspires
-                children and enhances recreational spaces — delivering maximum value to every client,
-                from government municipalities to luxury resort destinations.
+              <h3 className="font-display text-2xl sm:text-3xl font-bold brand-navy mb-6">Our Mission</h3>
+              <p className="text-gray-500 leading-relaxed text-base sm:text-lg italic">
+                "To provide high-quality, safe, and engaging amusement equipment that inspires children and enhances recreational spaces — delivering maximum value to every client."
               </p>
             </div>
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 border-t-4 border-t-brand-accent">
+            <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-xl border border-gray-50 border-t-8 border-t-brand-accent">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-white font-bold text-xl"
-                style={{ background: "#f59e0b" }}
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white font-bold text-2xl"
+                style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
               >
                 🌏
               </div>
-              <h3 className="font-display text-2xl font-bold brand-navy mb-4">Our Vision</h3>
-              <p className="text-gray-600 leading-relaxed">
-                To become a global leader in amusement ride manufacturing — known for innovation,
-                enduring quality, and an unwavering commitment to child safety and environmental
-                sustainability.
+              <h3 className="font-display text-2xl sm:text-3xl font-bold brand-navy mb-6">Our Vision</h3>
+              <p className="text-gray-500 leading-relaxed text-base sm:text-lg italic">
+                "To become a global leader in amusement ride manufacturing — known for innovation, enduring quality, and an unwavering commitment to child safety."
               </p>
             </div>
           </div>
@@ -381,58 +376,64 @@ export default function About() {
       </section>
 
       {/* LEADERSHIP SECTION */}
-      <section className="py-24 font-body" style={{ background: "#eef4fb" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="section-label">Leadership</p>
+      <section className="py-20 sm:py-32 font-body bg-brand-navy relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="zigzag-divider"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-16 sm:mb-24">
+            <p className="section-label" style={{ color: "#fcd34d" }}>Leadership</p>
             <div className="gold-line mx-auto"></div>
             <h2
-              className="font-display font-bold brand-navy"
-              style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
+              className="font-display font-bold text-white"
+              style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
             >
-              The Vision Behind the Brand
+              The Vision Behind <br className="sm:hidden" />
+              the <span className="text-brand-accent">Brand</span>
             </h2>
           </div>
 
-          <div className="max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-brand-primary/10">
+          <div className="max-w-5xl mx-auto bg-white rounded-[3rem] overflow-hidden shadow-3xl flex flex-col md:flex-row border border-white/10 group">
             {/* Image Side */}
-            <div className="w-full md:w-2/5 bg-brand-navy p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <div className="w-full md:w-2/5 bg-brand-navy p-10 sm:p-16 flex flex-col items-center justify-center text-center relative overflow-hidden">
               <div className="absolute -top-24 -left-24 w-48 h-48 bg-brand-primary/40 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-brand-accent/40 rounded-full blur-3xl"></div>
-
+              
               <div className="relative z-10">
-                <div className="w-32 h-32 bg-white rounded-full mx-auto mb-6 shadow-xl border-4 border-brand-accent/30 flex items-center justify-center p-2">
-                  {/* Placeholder for proprietor image if they want one later */}
-                  <div className="w-full h-full bg-brand-light rounded-full flex items-center justify-center">
-                    <span className="text-brand-primary font-display font-bold text-4xl">JB</span>
+                <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white rounded-[2.5rem] mx-auto mb-8 shadow-2xl border-4 border-brand-accent/20 flex items-center justify-center p-2 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                  <div className="w-full h-full bg-brand-light rounded-[2rem] flex items-center justify-center">
+                    <span className="text-brand-primary font-display font-bold text-5xl">JB</span>
                   </div>
                 </div>
-                <h3 className="font-display font-bold text-white text-3xl mb-1">Jeyamani Babu</h3>
-                <p className="text-brand-accent font-medium tracking-wider uppercase text-sm mb-4">Proprietor</p>
+                <h3 className="font-display font-bold text-white text-3xl sm:text-4xl mb-2">Jeyamani Babu</h3>
+                <p className="text-brand-accent font-black tracking-[0.2em] uppercase text-xs mb-8">Proprietor</p>
                 <a
                   href="https://bni-tirunelveli.in/tirunelveli-cmy-veli/en-IN/memberdetails?encryptedMemberId=KPZAM2s6IJl6HGNGEwH%2BgA%3D%3D&name=Babu+Jeyamani"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-xs tracking-wide transition-colors border border-white/20"
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white text-white hover:text-brand-navy px-6 py-3 rounded-2xl text-xs font-black tracking-widest transition-all border border-white/20 uppercase"
                 >
-                  View BNI Profile
+                  BNI Global Profile
                 </a>
               </div>
             </div>
 
             {/* Content Side */}
-            <div className="w-full md:w-3/5 p-8 md:p-12 flex flex-col justify-center">
-              <div className="text-brand-accent mb-6">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <div className="w-full md:w-3/5 p-10 sm:p-20 flex flex-col justify-center bg-white">
+              <div className="text-brand-accent mb-10">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                 </svg>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed mb-6 font-medium">
-                "Our goal has always been simple: to create environments where children can play safely and communities can thrive. At Indhu Amusement Ride Industries, we don't just manufacture equipment; we engineer joy, ensuring every product reflects our commitment to uncompromising quality and enduring durability."
+              <p className="text-brand-navy text-xl sm:text-2xl leading-relaxed mb-10 font-medium italic font-display">
+                "Our goal has always been simple: to create environments where children can play safely and communities can thrive. At Indhu Amusement Ride Industries, we engineering joy, ensuring every product reflects our commitment to uncompromising quality."
               </p>
-              <div className="border-t border-gray-100 pt-6">
-                <p className="font-bold brand-navy">Indhu Play Equipment Manufacturer</p>
-                <p className="text-gray-500 text-sm mt-1">Tirunelveli, Tamil Nadu</p>
+              <div className="border-t border-gray-100 pt-8 flex items-center gap-4">
+                <div className="h-0.5 w-12 bg-brand-accent"></div>
+                <div>
+                  <p className="font-black text-brand-navy uppercase tracking-widest text-sm text-[10px]">Indhu Industries</p>
+                  <p className="text-gray-400 text-xs mt-1">Tirunelveli, Tamil Nadu</p>
+                </div>
               </div>
             </div>
           </div>

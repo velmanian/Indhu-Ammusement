@@ -78,21 +78,21 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] flex items-center justify-center bg-brand-navy text-white overflow-hidden">
+      <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-center justify-center bg-brand-navy text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           {/* Hero Background Image */}
           <div className="w-full h-full bg-[url('/herobg.jpg')] bg-cover bg-center"></div>
-          {/* Glassmorphism Overlay with Brand Colors */}
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/60 via-brand-secondary/50 to-brand-navy/70 backdrop-blur-sm z-10"></div>
+          {/* Glassmorphism Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/70 via-brand-secondary/40 to-brand-navy/80 backdrop-blur-[2px] z-10"></div>
         </div>
 
-        <div className="relative z-20 text-center px-4 max-w-4xl">
+        <div className="relative z-20 text-center px-6 max-w-4xl py-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center mb-6 sm:mb-8"
+            className="flex justify-center mb-8 sm:mb-12"
           >
-            <div className="origin-center rounded-sm overflow-hidden scale-100 sm:scale-125 md:scale-150 lg:scale-200 xl:scale-250">
+            <div className="origin-center rounded-xl overflow-hidden scale-110 sm:scale-150 md:scale-200 lg:scale-250">
               <Logo size="default" />
             </div>
           </motion.div>
@@ -102,14 +102,14 @@ export default function Home() {
             transition={{
               delay: 0.3,
               duration: 0.8,
-              staggerChildren: 0.05
             }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-tight"
           >
             <motion.span
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
+              className="block sm:inline"
             >
               Crafting Joy through{' '}
             </motion.span>
@@ -122,7 +122,7 @@ export default function Home() {
                 type: "spring",
                 stiffness: 100
               }}
-              className="text-brand-accent inline-block"
+              className="text-brand-accent inline-block drop-shadow-[0_0_15px_rgba(198,211,0,0.3)]"
             >
               Innovation
             </motion.span>
@@ -131,7 +131,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 text-gray-200"
+            className="text-lg sm:text-xl md:text-2xl mb-10 text-white/80 max-w-2xl mx-auto leading-relaxed"
           >
             Leading manufacturer of FRP slides, swings, and premium amusement equipment for a better tomorrow.
           </motion.p>
@@ -139,56 +139,51 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center"
           >
-            <Link href="/products" className="bg-brand-accent text-brand-navy px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 hover:bg-opacity-90 transition">
+            <Link href="/products" className="bg-brand-accent text-brand-navy px-8 py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:shadow-[0_0_25px_rgba(198,211,0,0.5)] transition-all duration-300">
               Explore Products <ArrowRight size={20} />
             </Link>
-            <Link href="/enquiry" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border-2 border-white px-8 py-4 rounded-full font-bold text-lg transition text-center">
-              Enquire About Products
+            <Link href="/enquiry" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border-2 border-white/30 px-8 py-4 rounded-2xl font-black text-lg transition text-center">
+              Enquire Now
             </Link>
           </motion.div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-navy mb-16">Why Choose Indhu Industries?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="p-8 border border-gray-100 rounded-2xl hover:shadow-xl transition group bg-white">
-              <div className="w-16 h-16 bg-brand-light text-brand-primary rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-brand-primary group-hover:text-white transition">
-                <Shield size={32} />
+      <section className="py-20 sm:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16 sm:mb-24">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-brand-navy mb-6">Why Choose Indhu Industries?</h2>
+            <div className="h-1.5 w-24 bg-brand-accent mx-auto rounded-full"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-12">
+            {[
+              { icon: Shield, title: "Uncompromising Safety", desc: "All our equipment meets stringent safety standards for worry-free play.", color: "primary" },
+              { icon: Settings, title: "Custom Fabrication", desc: "FRP and steel components tailored to your specific site and design needs.", color: "secondary" },
+              { icon: Truck, title: "Global Delivery", desc: "Reliable logistics and installation services across India and beyond.", color: "accent" }
+            ].map((f, i) => (
+              <div key={i} className="p-8 border border-gray-100 rounded-[2rem] hover:shadow-2xl hover:shadow-brand-primary/5 transition-all duration-500 group bg-white flex flex-col items-center text-center">
+                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500 bg-brand-light group-hover:bg-brand-${f.color} ${f.color === 'accent' ? 'group-hover:text-brand-navy' : 'group-hover:text-white'}`}>
+                  <f.icon size={36} />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-brand-navy">{f.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{f.desc}</p>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-brand-navy">Uncompromising Safety</h3>
-              <p className="text-gray-600">All our equipment meets stringent safety standards for worry-free play.</p>
-            </div>
-            <div className="p-8 border border-gray-100 rounded-2xl hover:shadow-xl transition group bg-white">
-              <div className="w-16 h-16 bg-brand-light text-brand-secondary rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-brand-secondary group-hover:text-white transition">
-                <Settings size={32} />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-brand-navy">Custom Fabrication</h3>
-              <p className="text-gray-600">FRP and steel components tailored to your specific site and design needs.</p>
-            </div>
-            <div className="p-8 border border-gray-100 rounded-2xl hover:shadow-xl transition group bg-white">
-              <div className="w-16 h-16 bg-brand-light text-brand-accent rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-brand-accent group-hover:text-brand-navy transition">
-                <Truck size={32} />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-brand-navy">Global Delivery</h3>
-              <p className="text-gray-600">Reliable logistics and installation services across India and beyond.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* New Enhanced Expertise Section */}
-      <section className="py-24 bg-brand-light relative overflow-hidden" ref={expertiseRef}>
+      <section className="py-20 sm:py-32 bg-brand-light relative overflow-hidden" ref={expertiseRef}>
         {/* Background Decorative Elements */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/50 to-transparent pointer-events-none"></div>
         <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 sm:mb-16 gap-6">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={isExpertiseInView ? { opacity: 1, x: 0 } : {}}
@@ -197,12 +192,12 @@ export default function Home() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-1 w-12 bg-brand-accent rounded-full"></div>
-                <span className="text-brand-accent font-bold tracking-widest uppercase text-sm">Discover</span>
+                <span className="text-brand-accent font-black tracking-widest uppercase text-xs sm:text-sm">Discover</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black text-brand-navy leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-brand-navy leading-tight">
                 Our Core <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent">Expertise</span>
               </h2>
-              <p className="text-gray-500 mt-4 text-lg">
+              <p className="text-gray-500 mt-4 text-sm sm:text-lg max-w-xl">
                 Precision-engineered recreational solutions designed to transform ordinary spaces into extraordinary experiences.
               </p>
             </motion.div>
@@ -211,6 +206,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={isExpertiseInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 }}
+              className="hidden sm:block"
             >
               <Link href="/products" className="group flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-md text-brand-navy font-bold hover:shadow-lg hover:bg-brand-primary hover:text-white transition-all duration-300">
                 View Full Catalog
@@ -221,13 +217,29 @@ export default function Home() {
             </motion.div>
           </div>
 
-          <div
-            className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-[600px]"
-            onMouseLeave={() => setActiveExpertise(expertiseCategories[0].id)}
-          >
+          {/* Mobile Category Scroll (Visible only on mobile) */}
+          <div className="lg:hidden flex overflow-x-auto pb-6 -mx-6 px-6 gap-3 no-scrollbar scroll-smooth snap-x">
+            {expertiseCategories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveExpertise(category.id)}
+                className={`flex-none snap-start flex items-center gap-2 px-5 py-3 rounded-2xl border transition-all duration-300 ${activeExpertise === category.id
+                  ? 'bg-brand-primary border-brand-primary text-white shadow-lg'
+                  : 'bg-white border-gray-100 text-gray-500 hover:border-brand-primary/30'
+                  }`}
+              >
+                <category.icon size={18} />
+                <span className="font-bold text-sm whitespace-nowrap">{category.title}</span>
+              </button>
+            ))}
+          </div>
 
-            {/* Left Side: Interactive List */}
-            <div className="w-full lg:w-5/12 flex flex-col justify-center gap-4">
+          <div
+            className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-[500px] lg:min-h-[600px]"
+            onMouseLeave={() => window.innerWidth > 1024 && setActiveExpertise(expertiseCategories[0].id)}
+          >
+            {/* Left Side: Desktop Interactive List (Hidden on mobile) */}
+            <div className="hidden lg:flex w-5/12 flex-col justify-center gap-4">
               {expertiseCategories.map((category, index) => {
                 const Icon = category.icon;
                 const isActive = activeExpertise === category.id;
@@ -269,9 +281,6 @@ export default function Home() {
                           <p className="text-gray-500 text-sm md:text-base leading-relaxed">
                             {category.description}
                           </p>
-                          <Link href="/products" className="inline-flex items-center gap-1 mt-3 text-sm font-bold text-brand-primary hover:text-brand-accent transition-colors">
-                            Explore Catalog <ArrowRight size={14} />
-                          </Link>
                         </div>
                       </div>
 
@@ -285,59 +294,51 @@ export default function Home() {
               })}
             </div>
 
-            {/* Right Side: Showcase Image Display */}
-            <div className="w-full lg:w-7/12 relative rounded-[3rem] overflow-hidden shadow-2xl bg-gray-100 border-4 border-white/50 min-h-[400px]">
+            {/* Showcase Image Display (Responsive Layout) */}
+            <div className="w-full lg:w-7/12 relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-white border-4 border-white/50 min-h-[350px] sm:min-h-[450px]">
               {/* Background Glow */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${activeCategory.color} opacity-20 transition-colors duration-700 z-0`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${activeCategory.color} opacity-10 transition-colors duration-700 z-0`}></div>
 
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCategory.id}
-                  initial={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-                  transition={{ duration: 0.7, ease: "easeInOut" }}
-                  className="absolute inset-0 z-10 p-8 flex items-center justify-center bg-white"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 z-10 p-6 sm:p-12 flex flex-col sm:flex-row items-center gap-8"
                 >
-                  <img
-                    src={activeCategory.image}
-                    alt={activeCategory.title}
-                    className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)]"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = activeCategory.fallback;
-                      target.className = "w-full h-full object-cover opacity-80 mix-blend-multiply";
-                    }}
-                  />
+                  <div className="w-full sm:w-1/2 h-48 sm:h-full relative flex items-center justify-center">
+                    <img
+                      src={activeCategory.image}
+                      alt={activeCategory.title}
+                      className="max-w-full max-h-full object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = activeCategory.fallback;
+                        target.className = "w-full h-full object-cover opacity-80 mix-blend-multiply";
+                      }}
+                    />
+                  </div>
+                  <div className="w-full sm:w-1/2 flex flex-col justify-center text-center sm:text-left">
+                    <h3 className="text-2xl sm:text-3xl font-black text-brand-navy mb-4 lg:hidden">
+                      {activeCategory.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm sm:text-base lg:text-lg leading-relaxed mb-6">
+                      {activeCategory.description}
+                    </p>
+                    <Link href="/products" className="inline-flex items-center justify-center sm:justify-start gap-2 bg-brand-navy text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-primary transition-all">
+                      View Catalog <ArrowRight size={18} />
+                    </Link>
+                  </div>
                 </motion.div>
               </AnimatePresence>
 
-              {/* Overlay Content */}
-              <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-8 md:p-12">
-                <div className="self-end">
-                  <motion.div
-                    key={`badge-${activeCategory.id}`}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4, duration: 0.5 }}
-                    className="bg-white/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white flex items-center gap-3"
-                  >
-                    <div className="w-3 h-3 rounded-full bg-brand-accent animate-pulse"></div>
-                    <span className="font-bold text-brand-navy tracking-wide text-sm uppercase">Featured Showcase</span>
-                  </motion.div>
-                </div>
-
-                <div className="self-start">
-                  <motion.div
-                    key={`title-${activeCategory.id}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                  >
-                    <Link href="/products" className="pointer-events-auto inline-flex items-center gap-3 bg-brand-navy/90 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-brand-primary transition-colors hover:scale-105 duration-300">
-                      View Details <ArrowRight size={18} />
-                    </Link>
-                  </motion.div>
+              {/* Badge (Desktop only) */}
+              <div className="absolute top-6 right-6 z-20 hidden sm:block">
+                <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></div>
+                  <span className="font-bold text-brand-navy tracking-wide text-xs uppercase">Featured</span>
                 </div>
               </div>
             </div>
@@ -346,66 +347,66 @@ export default function Home() {
       </section>
 
       {/* Premium Location & Contact Section */}
-      <section className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-32 bg-white relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-12 text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center justify-center gap-2 bg-brand-primary/10 text-brand-primary px-4 py-2 rounded-full font-bold text-sm mb-4">
-              <MapPin size={16} /> Our Location
+            <div className="inline-flex items-center justify-center gap-2 bg-brand-primary/10 text-brand-primary px-4 py-2 rounded-full font-black text-xs sm:text-sm mb-4">
+              <MapPin size={16} /> OUR LOCATION
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-brand-navy">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-brand-navy mb-6">
               Visit Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent">Manufacturing Unit</span>
             </h2>
-            <p className="text-gray-500 mt-4 text-lg">
-              Come see where the magic of play is manufactured with precision and care.
+            <p className="text-gray-500 text-sm sm:text-lg">
+              Come see where the magic of play is manufactured with precision and care in the heart of Tirunelveli.
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6 bg-white rounded-[2.5rem] p-4 lg:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
+          <div className="flex flex-col lg:flex-row gap-6 bg-white rounded-[2rem] sm:rounded-[3rem] p-3 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-gray-100">
             {/* Contact Details Card */}
-            <div className="w-full lg:w-1/3 bg-gradient-to-br from-brand-navy to-[#0a1930] rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden flex flex-col justify-between">
+            <div className="w-full lg:w-1/3 bg-brand-navy rounded-[1.5rem] sm:rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden flex flex-col justify-between min-h-[400px]">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-accent/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-              <div className="relative z-10 flex-grow">
-                <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-8 backdrop-blur-md border border-white/20">
-                  <MapPin size={32} className="text-brand-accent" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-8 backdrop-blur-md border border-white/20">
+                  <MapPin size={28} className="text-brand-accent" />
                 </div>
 
-                <h3 className="text-3xl font-bold mb-4">Indhu Play Equipment Manufacturer</h3>
+                <h3 className="text-2xl sm:text-3xl font-black mb-8 leading-tight">Indhu Play Equipment Manufacturer</h3>
 
-                <div className="space-y-4 mb-8">
-                  <p className="text-blue-100/80 text-lg leading-relaxed flex items-start gap-3">
-                    <span className="mt-1">📍</span>
-                    <span>
+                <div className="space-y-6 mb-10">
+                  <div className="flex items-start gap-4">
+                    <span className="text-brand-accent mt-1 text-xl">📍</span>
+                    <p className="text-white/70 text-base sm:text-lg leading-relaxed">
                       No1, Railway Feeder road,<br />
-                      Maharaja Nagar,<br />
-                      Tirunelveli, India, 627011
-                    </span>
-                  </p>
-                  <p className="text-blue-100/80 text-lg font-medium flex items-center gap-3">
-                    <span>📞</span> 093823 08899
-                  </p>
-                  <p className="text-blue-100/80 text-lg font-medium flex items-center gap-3 break-all">
-                    <span>✉️</span> indhuamusement123@gmail.com
-                  </p>
+                      Maharaja Nagar, Tirunelveli,<br />
+                      Tamil Nadu, India, 627011
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-brand-accent text-xl">📞</span>
+                    <p className="text-white/70 text-lg sm:text-xl font-bold">+91 93823 08899</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-brand-accent text-xl">✉️</span>
+                    <p className="text-white/70 text-base sm:text-lg break-all">indhuamusement123@gmail.com</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="relative z-10">
+              <div className="relative z-10 pt-4">
                 <a
                   href="https://www.google.com/maps/dir//Indhu+Play+Equipment+Manufacturer"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-accent text-white w-full py-4 rounded-xl font-bold transition-colors text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transform duration-300"
+                  className="flex items-center justify-center gap-3 bg-brand-accent text-brand-navy w-full py-5 rounded-2xl font-black transition-all hover:shadow-[0_0_30px_rgba(198,211,0,0.3)] hover:-translate-y-1 text-lg"
                 >
-                  Get Directions <Navigation size={20} />
+                  GET DIRECTIONS <Navigation size={20} />
                 </a>
               </div>
             </div>
 
             {/* Map Iframe */}
-            <div className="w-full lg:w-2/3 h-[400px] lg:h-auto min-h-[450px] rounded-[2rem] overflow-hidden relative group shadow-inner bg-gray-100 border-2 border-dashed border-gray-200 hover:border-solid hover:border-brand-primary/50 transition-all duration-500">
-              <div className="absolute inset-0 bg-brand-navy/5 pointer-events-none z-10 rounded-[2rem] group-hover:bg-transparent transition-colors duration-500"></div>
+            <div className="w-full lg:w-2/3 h-[300px] sm:h-[450px] lg:h-auto rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden relative shadow-inner">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3943.832869427898!2d77.74251187477662!3d8.70741629134165!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0413070faac21f%3A0x6cb1243862b2327e!2sIndhu%20Play%20Equipment%20Manufacturer!5e0!3m2!1sen!2sin!4v1773481525021!5m2!1sen!2sin"
                 width="100%"
@@ -414,8 +415,8 @@ export default function Home() {
                 allowFullScreen={true}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Indhu Amusement Ride Industries Location"
-                className="absolute inset-0 w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                title="Google Maps Location"
+                className="absolute inset-0 w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
               ></iframe>
             </div>
           </div>
