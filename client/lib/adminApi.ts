@@ -57,22 +57,28 @@ export const uploadImages = async (files: File[]): Promise<string[]> => {
   return data.urls as string[];
 };
 
-export const updateEnquiryStatus = async (enquiryId: number, data: any) => {
+export const updateEnquiryStatus = async (enquiryId: any, data: any) => {
   const res = await fetch(`${API_URL}/admin/enquiries/${enquiryId}`, {
     method: 'PUT',
     headers: getAuthHeader(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update enquiry status');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update enquiry status');
+  }
   return res.json();
 };
 
-export const deleteEnquiry = async (enquiryId: number) => {
+export const deleteEnquiry = async (enquiryId: any) => {
   const res = await fetch(`${API_URL}/admin/enquiries/${enquiryId}`, {
     method: 'DELETE',
     headers: getAuthHeader(),
   });
-  if (!res.ok) throw new Error('Failed to delete enquiry');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to delete enquiry');
+  }
   return res.json();
 };
 

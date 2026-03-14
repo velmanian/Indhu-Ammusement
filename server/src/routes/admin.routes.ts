@@ -4,28 +4,17 @@ import path from 'path';
 import fs from 'fs';
 import { createProduct, updateProduct, deleteProduct, getProducts as adminGetProducts } from '../controllers/product.controller';
 import { createCategory, getCategories } from '../controllers/category.controller';
-import { getEnquiries, updateEnquiryStatus, getEnquiryById } from '../controllers/enquiry.controller';
+import { getEnquiries, updateEnquiryStatus, getEnquiryById, deleteEnquiry } from '../controllers/enquiry.controller';
 import { bulkUploadProducts, bulkUploadImages } from '../controllers/bulk.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 
+import { storage as cloudinaryStorage } from '../config/cloudinary';
+
 const router = Router();
 
-// Multer storage config — save to /uploads with original extension
-const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-const storage = multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadsDir),
-    filename: (_req, file, cb) => {
-        const unique = Date.now() + '-' + Math.round(Math.random() * 1e6);
-        cb(null, unique + path.extname(file.originalname));
-    },
-});
-
-const memoryStorage = multer.memoryStorage();
-
+// Storage config switched to Cloudinary
 const upload = multer({
-    storage,
+    storage: cloudinaryStorage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
     fileFilter: (_req, file, cb) => {
         if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -33,19 +22,19 @@ const upload = multer({
     },
 });
 
-const memoryUpload = multer({ storage: memoryStorage });
+const memoryUpload = multer({ storage: multer.memoryStorage() });
 
 router.use(authenticateToken);
 
 // Image upload endpoint
 router.post('/upload', upload.array('images', 10), (req: Request, res: Response) => {
-    const files = req.files as Express.Multer.File[];
+    const files = req.files as any[];
     if (!files || files.length === 0) {
         res.status(400).json({ message: 'No files uploaded' });
         return;
     }
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const urls = files.map(f => `${baseUrl}/uploads/${f.filename}`);
+    // Cloudinary storage returns 'path' as the URL
+    const urls = files.map(f => f.path);
     res.json({ urls });
 });
 
@@ -60,6 +49,7 @@ router.post('/categories', createCategory);
 router.get('/enquiries', getEnquiries);
 router.get('/enquiries/:id', getEnquiryById);
 router.put('/enquiries/:id', updateEnquiryStatus);
+router.delete('/enquiries/:id', deleteEnquiry);
 
 // Bulk Uploads
 router.post('/bulk-products', memoryUpload.single('file'), bulkUploadProducts);

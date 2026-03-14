@@ -31,6 +31,23 @@ const enquirySchema = new mongoose_1.default.Schema({
         ref: 'Product',
         required: false,
     },
+    selectedProducts: {
+        type: [{
+                id: Number,
+                name: String,
+                slug: String,
+                image: String,
+                description: String,
+                price: String,
+                categoryId: Number,
+                category: {
+                    id: Number,
+                    name: String,
+                    slug: String
+                }
+            }],
+        required: false,
+    },
     usagePurpose: {
         type: [String],
         required: false,

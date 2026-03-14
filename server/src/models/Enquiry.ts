@@ -44,15 +44,15 @@ const enquirySchema = new mongoose.Schema<IEnquiry>({
   },
   selectedProducts: {
     type: [{
-      id: Number,
+      id: mongoose.Schema.Types.Mixed,
+      _id: { type: mongoose.Schema.Types.Mixed, required: false },
       name: String,
       slug: String,
       image: String,
       description: String,
-      price: String,
-      categoryId: Number,
+      categoryId: mongoose.Schema.Types.Mixed,
       category: {
-        id: Number,
+        id: mongoose.Schema.Types.Mixed,
         name: String,
         slug: String
       }
@@ -72,6 +72,9 @@ const enquirySchema = new mongoose.Schema<IEnquiry>({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 export const EnquiryModel = mongoose.model<IEnquiry>('Enquiry', enquirySchema);

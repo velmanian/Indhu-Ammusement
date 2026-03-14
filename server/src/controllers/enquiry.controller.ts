@@ -121,7 +121,7 @@ export const updateEnquiryStatus = async (req: Request, res: Response) => {
       path: 'productId',
       select: 'name slug description images categoryId',
       populate: {
-        path: 'categoryId',
+        path: 'category',
         select: 'name slug description'
       }
     });
@@ -143,7 +143,7 @@ export const getEnquiries = async (req: Request, res: Response) => {
         path: 'productId',
         select: 'name slug description images categoryId',
         populate: {
-          path: 'categoryId',
+          path: 'category',
           select: 'name slug description'
         }
       })
@@ -163,7 +163,7 @@ export const getEnquiryById = async (req: Request, res: Response) => {
         path: 'productId',
         select: 'name slug description images categoryId',
         populate: {
-          path: 'categoryId',
+          path: 'category',
           select: 'name slug description'
         }
       })
@@ -176,5 +176,19 @@ export const getEnquiryById = async (req: Request, res: Response) => {
     res.json(enquiry);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching enquiry', error });
+  }
+};
+export const deleteEnquiry = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const enquiry = await EnquiryModel.findByIdAndDelete(id);
+
+    if (!enquiry) {
+      return res.status(404).json({ message: 'Enquiry not found' });
+    }
+
+    res.json({ success: true, message: 'Enquiry deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting enquiry', error });
   }
 };

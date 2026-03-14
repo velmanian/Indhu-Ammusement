@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEnquiries = exports.updateEnquiryStatus = exports.submitEnquiry = void 0;
+exports.getEnquiryById = exports.getEnquiries = exports.updateEnquiryStatus = exports.submitEnquiry = void 0;
 const Enquiry_1 = require("../models/Enquiry");
 const Product_1 = require("../models/Product");
 const whatsapp_utils_1 = require("../utils/whatsapp.utils");
@@ -16,27 +16,34 @@ const submitEnquiry = async (req, res) => {
         }
         // Create enquiry in database
         let product = null;
-        if (productId) {
-            product = await Product_1.ProductModel.findById(productId);
+        let enquiryId = Date.now().toString();
+        try {
+            if (productId) {
+                product = await Product_1.ProductModel.findById(productId);
+            }
+            const enquiryData = {
+                name,
+                phone,
+                email: email || '',
+                location,
+                message: message || 'Product enquiry',
+            };
+            if (product) {
+                enquiryData.productId = product._id;
+            }
+            // Handle selected products array from the form
+            if (selectedProducts && selectedProducts.length > 0) {
+                enquiryData.selectedProducts = selectedProducts;
+            }
+            const enquiry = new Enquiry_1.EnquiryModel(enquiryData);
+            await enquiry.save();
+            // Populate the product data
+            await enquiry.populate('productId', 'name slug description');
+            enquiryId = enquiry.id;
         }
-        const enquiryData = {
-            name,
-            phone,
-            email: email || '',
-            location,
-            message: message || 'Product enquiry',
-        };
-        if (product) {
-            enquiryData.productId = product._id;
+        catch (dbError) {
+            console.error('Warning: Failed to save enquiry to database, but continuing with WhatsApp URL generation:', dbError);
         }
-        // Handle selected products array from the form
-        if (selectedProducts && selectedProducts.length > 0) {
-            enquiryData.selectedProducts = selectedProducts;
-        }
-        const enquiry = new Enquiry_1.EnquiryModel(enquiryData);
-        await enquiry.save();
-        // Populate the product data
-        await enquiry.populate('productId', 'name slug description');
         // Generate formatted WhatsApp message using utility function
         const whatsappMessage = (0, whatsapp_utils_1.formatWhatsAppMessage)({
             name,
@@ -75,7 +82,7 @@ const submitEnquiry = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Enquiry submitted successfully',
-            enquiryId: enquiry.id,
+            enquiryId: enquiryId,
             whatsappUrl: whatsappUrl // Include the generated WhatsApp URL
         });
     }
@@ -132,3 +139,26 @@ const getEnquiries = async (req, res) => {
     }
 };
 exports.getEnquiries = getEnquiries;
+const getEnquiryById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const enquiry = await Enquiry_1.EnquiryModel.findById(id)
+            .populate({
+            path: 'productId',
+            select: 'name slug description images categoryId',
+            populate: {
+                path: 'categoryId',
+                select: 'name slug description'
+            }
+        })
+            .select('-__v'); // Exclude version key
+        if (!enquiry) {
+            return res.status(404).json({ message: 'Enquiry not found' });
+        }
+        res.json(enquiry);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching enquiry', error });
+    }
+};
+exports.getEnquiryById = getEnquiryById;

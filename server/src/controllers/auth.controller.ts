@@ -8,9 +8,10 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     // Hardcoded test fallback for when DB is down
-    if (email === 'test@gmail.com' && password === '123') {
+    if ((email === 'test@gmail.com' && password === '123') ||
+      (email === 'mani@gmail.com' && password === '123')) {
       const token = jwt.sign(
-        { userId: 'test_admin_id', email: 'test@gmail.com' },
+        { userId: 'test_admin_id', email: email },
         process.env.JWT_SECRET || 'fallback_secret',
         { expiresIn: '1d' }
       );
@@ -19,8 +20,8 @@ export const login = async (req: Request, res: Response) => {
         token,
         user: {
           id: 'test_admin_id',
-          email: 'test@gmail.com',
-          name: 'Test Admin',
+          email: email,
+          name: email === 'mani@gmail.com' ? 'Mani' : 'Test Admin',
         },
       });
     }

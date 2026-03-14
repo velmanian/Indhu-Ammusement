@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchAdmin, createProduct, updateProduct, deleteProduct, updateEnquiryStatus, deleteEnquiry, bulkUploadExcel, bulkUploadZip } from '@/lib/adminApi';
 import { Enquiry, Product, Category } from '@/types';
-import { LayoutDashboard, ShoppingBag, MessageSquare, LogOut, Loader2, Plus, Edit, Trash2, FileUp, FileArchive, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, MessageSquare, LogOut, Loader2, Plus, Edit, Trash2, FileUp, FileArchive, RefreshCw, X, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ProductModal from '@/components/ProductModal';
+import EnquiryDetailModal from '@/components/EnquiryDetailModal';
 
 export default function AdminDashboard() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
@@ -18,9 +19,12 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'RESPONDED' | 'CLOSED'>('ALL');
-  const [selectedEnquiries, setSelectedEnquiries] = useState<number[]>([]);
+  const [selectedEnquiries, setSelectedEnquiries] = useState<any[]>([]);
   const [productSearch, setProductSearch] = useState('');
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [selectedExcelFile, setSelectedExcelFile] = useState<File | null>(null);
+  const [selectedZipFile, setSelectedZipFile] = useState<File | null>(null);
+  const [selectedEnquiryForDetail, setSelectedEnquiryForDetail] = useState<Enquiry | null>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -53,27 +57,38 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  const handleUpdateEnquiryStatus = async (enquiryId: number, newStatus: string) => {
+  const handleUpdateEnquiryStatus = async (enquiryId: any, newStatus: string) => {
+    // 1. Store original states for potential revert
+    const originalEnquiries = [...enquiries];
+    const originalSelectedDetail = selectedEnquiryForDetail ? { ...selectedEnquiryForDetail } : null;
+
+    // 2. Apply optimistic updates
+    setEnquiries(prev => prev.map(enq =>
+      (enq._id === enquiryId || enq.id === enquiryId) ? { ...enq, status: newStatus } : enq
+    ));
+
+    if (selectedEnquiryForDetail && (selectedEnquiryForDetail._id === enquiryId || selectedEnquiryForDetail.id === enquiryId)) {
+      setSelectedEnquiryForDetail({ ...selectedEnquiryForDetail, status: newStatus });
+    }
+
     try {
-      // Update the status in the backend
+      // 3. Update the status in the backend
       await updateEnquiryStatus(enquiryId, { status: newStatus });
-
-      // Update the local state
-      setEnquiries(prev => prev.map(enq =>
-        enq.id === enquiryId ? { ...enq, status: newStatus } : enq
-      ));
-
       console.log('Enquiry status updated successfully');
     } catch (error) {
       console.error('Error updating enquiry status:', error);
-      // Revert the status in UI if the update failed
-      setEnquiries(prev => prev.map(enq =>
-        enq.id === enquiryId ? { ...enq, status: enquiries.find(e => e.id === enquiryId)?.status || enq.status } : enq
-      ));
+
+      // 4. Revert states if the update failed
+      setEnquiries(originalEnquiries);
+      if (originalSelectedDetail && (originalSelectedDetail._id === enquiryId || originalSelectedDetail.id === enquiryId)) {
+        setSelectedEnquiryForDetail(originalSelectedDetail);
+      }
+
+      alert('Failed to update enquiry status. Please try again.');
     }
   };
 
-  const handleDeleteEnquiry = async (enquiryId: number) => {
+  const handleDeleteEnquiry = async (enquiryId: any) => {
     if (!confirm('Are you sure you want to delete this enquiry?')) return;
 
     try {
@@ -81,7 +96,7 @@ export default function AdminDashboard() {
       await deleteEnquiry(enquiryId);
 
       // Update local state
-      setEnquiries(prev => prev.filter(enq => enq.id !== enquiryId));
+      setEnquiries(prev => prev.filter(enq => enq._id !== enquiryId && enq.id !== enquiryId));
 
       // Remove from selection if it was selected
       setSelectedEnquiries(prev => prev.filter(id => id !== enquiryId));
@@ -105,7 +120,7 @@ export default function AdminDashboard() {
       );
 
       // Update local state
-      setEnquiries(prev => prev.filter(enq => !selectedEnquiries.includes(enq.id)));
+      setEnquiries(prev => prev.filter(enq => !selectedEnquiries.includes(enq._id) && !selectedEnquiries.includes(enq.id)));
       setSelectedEnquiries([]);
 
       console.log(`${selectedEnquiries.length} enquiries deleted successfully`);
@@ -115,7 +130,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const toggleEnquirySelection = (enquiryId: number) => {
+  const toggleEnquirySelection = (enquiryId: any) => {
     setSelectedEnquiries(prev =>
       prev.includes(enquiryId)
         ? prev.filter(id => id !== enquiryId)
@@ -127,7 +142,7 @@ export default function AdminDashboard() {
     if (selectedEnquiries.length === filteredEnquiries.length) {
       setSelectedEnquiries([]);
     } else {
-      setSelectedEnquiries(filteredEnquiries.map(enq => enq.id));
+      setSelectedEnquiries(filteredEnquiries.map(enq => enq._id || enq.id));
     }
   };
 
@@ -165,42 +180,53 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    setBulkLoading(true);
-    try {
-      const res = await bulkUploadExcel(file);
-      alert(res.message);
-      await refreshData();
-    } catch (error) {
-      console.error('Excel upload error:', error);
-      alert('Failed to upload Excel file');
-    } finally {
-      setBulkLoading(false);
-      if (excelInputRef.current) excelInputRef.current.value = '';
-    }
+    if (file) setSelectedExcelFile(file);
+    if (excelInputRef.current) excelInputRef.current.value = '';
   };
 
-  const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleZipSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) setSelectedZipFile(file);
+    if (zipInputRef.current) zipInputRef.current.value = '';
+  };
+
+  const handleBulkSubmit = async () => {
+    if (!selectedExcelFile) {
+      alert('Please select an Excel file first.');
+      return;
+    }
+
     setBulkLoading(true);
     try {
-      const res = await bulkUploadZip(file);
-      alert(res.message + "\n\nNow you can upload your Excel file to link these images to products.");
-    } catch (error) {
-      console.error('ZIP upload error:', error);
-      alert('Failed to upload ZIP file');
+      // 1. Upload ZIP if exists
+      if (selectedZipFile) {
+        console.log('Step 1: Uploading ZIP...');
+        const zipRes = await bulkUploadZip(selectedZipFile);
+        console.log('ZIP upload success:', zipRes);
+      }
+
+      // 2. Upload Excel
+      console.log('Step 2: Uploading Excel...');
+      const excelRes = await bulkUploadExcel(selectedExcelFile);
+      alert(excelRes.message);
+
+      // Reset selection and refresh
+      setSelectedExcelFile(null);
+      setSelectedZipFile(null);
+      await refreshData();
+    } catch (error: any) {
+      console.error('Bulk submission error:', error);
+      alert('Bulk upload failed: ' + (error.message || 'Unknown error'));
     } finally {
       setBulkLoading(false);
-      if (zipInputRef.current) zipInputRef.current.value = '';
     }
   };
 
   const downloadTemplate = () => {
-    const headers = ['Product Name', 'Category', 'Description', 'Price', 'Image Name', 'Dimensions', 'Material', 'Age Group', 'Installation', 'Warranty', 'Status'];
-    const sampleRow = ['Kids Slide', 'Slides', 'Outdoor playground slide', '10000', 'slide1.jpg', '6ft', 'FRP', '3–10 yrs', 'Yes', '1 Year', 'Active'];
+    const headers = ['Product Name', 'Category', 'Description', 'Image Name', 'Dimensions', 'Material', 'Age Group', 'Installation', 'Warranty', 'Status'];
+    const sampleRow = ['Kids Slide', 'Slides', 'Outdoor playground slide', 'slide1.jpg', '6ft', 'FRP', '3–10 yrs', 'Yes', '1 Year', 'Active'];
     const csvContent = [headers.join(','), sampleRow.join(',')].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -347,32 +373,64 @@ export default function AdminDashboard() {
                 <input
                   type="file"
                   ref={excelInputRef}
-                  onChange={handleExcelUpload}
-                  accept=".xlsx,.xls"
+                  onChange={handleExcelSelection}
+                  accept=".xlsx,.xls,.csv"
                   className="hidden"
                 />
                 <input
                   type="file"
                   ref={zipInputRef}
-                  onChange={handleZipUpload}
+                  onChange={handleZipSelection}
                   accept=".zip"
                   className="hidden"
                 />
-                <button
-                  onClick={() => excelInputRef.current?.click()}
-                  disabled={bulkLoading}
-                  className="bg-green-600 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition disabled:opacity-50 text-xs sm:text-sm"
-                  title="Step 2: Upload products via Excel"
-                >
-                  <FileUp size={18} /> 2. Upload Excel
-                </button>
+
+                {/* File Status & Submit */}
+                {(selectedExcelFile || selectedZipFile) && (
+                  <div className="flex items-center gap-3 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 mr-2">
+                    <div className="text-xs">
+                      {selectedZipFile && (
+                        <div className="text-orange-600 font-bold flex items-center gap-1">
+                          <FileArchive size={12} /> ZIP Ready
+                        </div>
+                      )}
+                      {selectedExcelFile && (
+                        <div className="text-green-600 font-bold flex items-center gap-1">
+                          <FileUp size={12} /> Excel Ready
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleBulkSubmit}
+                      disabled={bulkLoading || !selectedExcelFile}
+                      className="bg-blue-900 text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-blue-800 transition disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {bulkLoading ? <Loader2 size={12} className="animate-spin" /> : 'Finish & Submit'}
+                    </button>
+                    <button
+                      onClick={() => { setSelectedExcelFile(null); setSelectedZipFile(null); }}
+                      className="text-gray-400 hover:text-red-500 transition"
+                      title="Clear Selection"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
                 <button
                   onClick={() => zipInputRef.current?.click()}
-                  disabled={bulkLoading}
-                  className="bg-orange-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-orange-600 transition disabled:opacity-50 text-xs sm:text-sm"
-                  title="Step 1: Upload images via ZIP"
+                  className={`px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition text-xs sm:text-sm ${selectedZipFile ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
+                  title="Step 1: Select images ZIP"
                 >
-                  <FileArchive size={18} /> 1. Upload ZIP
+                  <FileArchive size={18} /> {selectedZipFile ? 'ZIP Selected' : '1. Select ZIP'}
+                </button>
+
+                <button
+                  onClick={() => excelInputRef.current?.click()}
+                  className={`px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition text-xs sm:text-sm ${selectedExcelFile ? 'bg-green-100 text-green-600 border border-green-200' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                  title="Step 2: Select products Excel"
+                >
+                  <FileUp size={18} /> {selectedExcelFile ? 'Excel Selected' : '2. Select Excel'}
                 </button>
                 <button
                   onClick={downloadTemplate}
@@ -400,154 +458,118 @@ export default function AdminDashboard() {
         </div>
 
         {activeTab === 'enquiries' ? (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50/50">
                   <tr key="header-row">
-                    <th className="px-2 py-3 text-left">
+                    <th className="px-6 py-5 text-left">
                       <input
                         type="checkbox"
                         checked={selectedEnquiries.length > 0 && selectedEnquiries.length === filteredEnquiries.length}
                         onChange={() => selectAllEnquiries(filteredEnquiries)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        className="h-5 w-5 text-blue-900 rounded-lg border-gray-300 focus:ring-blue-900 transition-all"
                       />
                     </th>
-                    <th className="px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date & Contact</th>
-                    <th className="px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Products & Purpose</th>
-                    <th className="hidden md:table-cell px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Location</th>
-                    <th className="hidden lg:table-cell px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Message</th>
-                    <th className="px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Customer & Date</th>
+                    <th className="px-6 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Products</th>
+                    <th className="hidden md:table-cell px-6 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Location</th>
+                    <th className="px-6 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Status</th>
+                    <th className="px-6 py-5 text-right text-xs font-black text-gray-400 uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredEnquiries.map(enq => (
-                    <tr key={enq.id} className={`hover:bg-blue-50 transition duration-150 ease-in-out ${selectedEnquiries.includes(enq.id) ? 'bg-blue-50' : ''}`}>
-                      <td className="px-2 py-4 whitespace-nowrap">
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {filteredEnquiries.map((enq, idx) => (
+                    <tr
+                      key={enq._id || enq.id || `enq-${idx}`}
+                      className={`group hover:bg-blue-50/30 transition-all duration-200 ${(selectedEnquiries as any).includes(enq._id || enq.id) ? 'bg-blue-50/50' : ''}`}
+                    >
+                      <td className="px-6 py-6 whitespace-nowrap">
                         <input
                           type="checkbox"
-                          checked={selectedEnquiries.includes(enq.id)}
-                          onChange={() => toggleEnquirySelection(enq.id)}
-                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          checked={(selectedEnquiries as any).includes(enq._id || enq.id)}
+                          onChange={() => toggleEnquirySelection((enq._id || enq.id) as any)}
+                          className="h-5 w-5 text-blue-900 rounded-lg border-gray-300 focus:ring-blue-900 transition-all"
                         />
                       </td>
-                      <td className="px-2 py-3 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900">{enq.name}</div>
-                        <div className="text-sm text-gray-500">{new Date(enq.createdAt).toLocaleDateString()}</div>
-                        <div className="mt-2 flex flex-col gap-1">
-                          <div className="flex items-center text-xs text-gray-600">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.448 3.853a1 1 0 01-.5 1.172l-2.187 1.148a1 1 0 00-.45 1.353l1.27 2.118a1 1 0 01-.2 1.253l-1.6 1.2a1 1 0 00-.25 1.1l.6 1.4a1 1 0 01-.3 1.2l-1.4.6a1 1 0 00-1.1.25l-1.2 1.6a1 1 0 01-1.253.2l-2.118-1.27a1 1 0 00-1.353.45l-1.148 2.187a1 1 0 01-1.172.5L4 17.28A1 1 0 013 16.28V5z" />
-                            </svg>
-                            {enq.phone}
-                          </div>
-                          <div className="flex items-center text-xs text-gray-600">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            {enq.email}
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-gray-900 group-hover:text-blue-900 transition-colors">{enq.name}</span>
+                          <span className="text-xs font-bold text-gray-400 mt-0.5">{new Date(enq.createdAt).toLocaleDateString()}</span>
+                          <div className="mt-2 flex items-center gap-2 text-[10px] font-bold text-gray-500">
+                            <span className="bg-gray-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <MessageSquare size={10} /> {enq.phone}
+                            </span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-2 py-3">
-                        <div className="space-y-1">
-                          {/* Selected Products List */}
-                          <div>
-                            <div className="text-xs font-semibold text-gray-500 mb-1">Products:</div>
-                            {enq.selectedProducts && Array.isArray(enq.selectedProducts) && enq.selectedProducts.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {enq.selectedProducts.map((prod: any, index: number) => (
-                                  <span
-                                    key={enq.id + '-' + index}
-                                    className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                                    title={prod.name || prod.id || 'Unknown Product'}
-                                  >
-                                    {prod.name || prod.id || 'Unknown Product'}
-                                  </span>
-                                ))}
+                      <td className="px-6 py-6">
+                        <div className="flex -space-x-3 hover:space-x-1 transition-all duration-300">
+                          {enq.selectedProducts && Array.isArray(enq.selectedProducts) && enq.selectedProducts.length > 0 ? (
+                            enq.selectedProducts.slice(0, 4).map((prod: any, idx: number) => (
+                              <div
+                                key={`${enq._id || enq.id}-${idx}`}
+                                className="w-10 h-10 rounded-xl border-2 border-white shadow-sm overflow-hidden bg-gray-100 flex-shrink-0 relative group/thumb"
+                              >
+                                <img
+                                  src={prod.image || '/placeholder-image.png'}
+                                  alt={prod.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
+                                  <span className="text-[8px] text-white font-black text-center px-1 leading-tight">{prod.name}</span>
+                                </div>
                               </div>
-                            ) : enq.product ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {enq.product.name}
-                              </span>
-                            ) : (
-                              <div className="text-xs text-gray-500 italic">General</div>
-                            )}
-                          </div>
-
-                          {/* Usage Purpose */}
-                          {enq.usagePurpose && enq.usagePurpose.length > 0 && (
-                            <div>
-                              <div className="text-xs font-semibold text-gray-500 mb-1">Usage:</div>
-                              <div className="flex flex-wrap gap-1">
-                                {enq.usagePurpose.map((purpose: string, index: number) => (
-                                  <span
-                                    key={enq.id + '-purpose-' + index}
-                                    className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                  >
-                                    {purpose}
-                                  </span>
-                                ))}
-                              </div>
+                            ))
+                          ) : enq.product ? (
+                            <div className="w-10 h-10 rounded-xl border-2 border-white shadow-sm overflow-hidden bg-gray-100 flex-shrink-0">
+                              <img
+                                src={enq.product.images?.[0] || '/placeholder-image.png'}
+                                alt={enq.product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => (e.currentTarget.src = '/placeholder-image.png')}
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-xs font-bold text-gray-400 italic">General Enquiry</span>
+                          )}
+                          {enq.selectedProducts && enq.selectedProducts.length > 4 && (
+                            <div className="w-10 h-10 rounded-xl border-2 border-white shadow-sm bg-blue-900 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+                              +{enq.selectedProducts.length - 4}
                             </div>
                           )}
                         </div>
                       </td>
-                      <td className="hidden md:table-cell px-2 py-3">
-                        <div className="text-sm text-gray-500 max-w-[120px] truncate">{enq.location}</div>
-                      </td>
-                      <td className="hidden lg:table-cell px-2 py-3">
-                        <div className="text-sm text-gray-900 max-w-[150px] truncate hidden lg:block" title={enq.message}>{enq.message}</div>
-                        <div className="mt-2">
-                          <span className={'px-2 py-1 rounded-full text-xs font-bold ' +
-                            (enq.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                              enq.status === 'RESPONDED' ? 'bg-green-100 text-green-800' :
-                                'bg-red-100 text-red-800')
-                          }>
-                            {enq.status}
-                          </span>
+                      <td className="hidden md:table-cell px-6 py-6">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600">
+                          <MapPin size={14} className="text-blue-900" />
+                          {enq.location}
                         </div>
                       </td>
-                      <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-col gap-2">
-                          <select
-                            value={enq.status}
-                            onChange={(e) => handleUpdateEnquiryStatus(enq.id, e.target.value)}
-                            className="w-full text-xs font-bold px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${enq.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                          enq.status === 'RESPONDED' ? 'bg-green-50 text-green-700 border-green-100' :
+                            'bg-gray-50 text-gray-700 border-gray-100'
+                          }`}>
+                          {enq.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 whitespace-nowrap text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          <button
+                            onClick={() => setSelectedEnquiryForDetail(enq)}
+                            className="p-2 bg-blue-50 text-blue-900 rounded-xl hover:bg-blue-900 hover:text-white transition-all duration-300"
+                            title="View Full Details"
                           >
-                            <option value="PENDING">PENDING</option>
-                            <option value="RESPONDED">RESPONDED</option>
-                            <option value="CLOSED">CLOSED</option>
-                          </select>
-                          <div className="flex gap-2 mt-2">
-                            <a
-                              href={'https://wa.me/' + enq.phone.replace(/[^0-9]/g, '') + '?text=Hello ' + encodeURIComponent(enq.name) + ', we received your enquiry about ' + (enq.selectedProducts && enq.selectedProducts.length > 0 ? enq.selectedProducts[0]?.name : enq.product?.name || 'our products') + ' and would like to assist you.'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition duration-200"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                                <path d="M17.502 16.842c-.94-.618-1.826-1.132-2.905-1.132-1.387 0-2.33.722-3.42 2.158-1.957-1.044-3.75-3.419-3.75-5.81 0-3.312 2.96-6.437 6.96-6.437 3.867 0 6.54 2.812 6.54 6.06 0 1.866-.84 3.533-2.375 4.724zm-4.835-9.69c-2.077 0-3.75 1.8-3.75 4 0 1.08.66 2.106 1.83 2.64.3.12.42.3.3.54l-1.02 2.34c-.12.3.06.42.3.48l2.46-.54c.72 0 1.38-.18 1.98-.48.96-.42 1.62-1.26 1.62-2.28 0-2.2-1.68-4-3.75-4z" /><circle cx="10.5" cy="9" r="1" /><circle cx="13.5" cy="9" r="1" /><path d="M18 3H6c-1.657 0-3 1.343-3 3v12c0 1.657 1.343 3 3 3h12c1.657 0 3-1.343 3-3V6c0-1.657-1.343-3-3-3zm.5 15c0 .276-.224.5-.5.5H6c-.276 0-.5-.224-.5-.5V6c0-.276.224-.5.5-.5h12c.276 0 .5.224.5.5v12z" />
-                              </svg>
-                              <span className="text-xs font-bold ml-1">WhatsApp</span>
-                            </a>
-                            <a
-                              href={'mailto:' + enq.email + '?subject=Regarding your enquiry&body=Hello ' + encodeURIComponent(enq.name) + ', we received your enquiry about ' + (enq.selectedProducts && enq.selectedProducts.length > 0 ? enq.selectedProducts[0]?.name : enq.product?.name || 'our products') + ' and would like to assist you.'}
-                              className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition duration-200"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                                <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z" />
-                              </svg>
-                              <span className="text-xs font-bold ml-1">Email</span>
-                            </a>
-                            <button
-                              onClick={() => handleDeleteEnquiry(enq.id)}
-                              className="flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition duration-200"
-                            >
-                              <Trash2 size={16} />
-                              <span className="text-xs font-bold ml-1">Delete</span>
-                            </button>
-                          </div>
+                            <LayoutDashboard size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEnquiry((enq._id || enq.id) as any)}
+                            className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300"
+                            title="Delete Enquiry"
+                          >
+                            <Trash2 size={18} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -669,6 +691,12 @@ export default function AdminDashboard() {
         categories={categories}
         loading={submitLoading}
         editingProduct={editingProduct}
+      />
+
+      <EnquiryDetailModal
+        enquiry={selectedEnquiryForDetail}
+        onClose={() => setSelectedEnquiryForDetail(null)}
+        onUpdateStatus={handleUpdateEnquiryStatus}
       />
     </div>
   );

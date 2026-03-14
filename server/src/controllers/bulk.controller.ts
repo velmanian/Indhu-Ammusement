@@ -1,9 +1,13 @@
 import { Request, Response } from 'express';
 import * as xlsx from 'xlsx';
 import AdmZip from 'adm-zip';
-import path from 'path';
-import fs from 'fs';
 import { getFallbackData, saveFallbackData } from '../lib/fallbackDb';
+import { v2 as cloudinary } from 'cloudinary';
+import { ProductModel } from '../models/Product';
+import { CategoryModel } from '../models/Category';
+
+// Temporary in-memory store for ZIP mapping (resets on server restart)
+let imageMapping: { [key: string]: string } = {};
 
 export const bulkUploadProducts = async (req: Request, res: Response) => {
     try {
@@ -16,68 +20,101 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
         const worksheet = workbook.Sheets[sheetName];
         const data: any[] = xlsx.utils.sheet_to_json(worksheet);
 
-        const fallback = getFallbackData();
         const newProducts: any[] = [];
-        const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+        const fallback = getFallbackData();
 
-        data.forEach((item, index) => {
-            // User's specific columns: Product Name, Category, Description, Price, Image Name, Dimensions, Material, Age Group, Installation, Warranty, Status
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
             const name = item['Product Name'] || item.Name || item.name;
-            if (!name) return;
+            if (!name) continue;
 
-            const categoryName = item.Category || item.category;
-            let category = fallback.categories.find(c => c.name === categoryName);
+            const categoryName = item.Category || item.category || 'Other';
 
-            if (!category && categoryName) {
-                category = {
-                    _id: 'offline_cat_' + Date.now() + index,
-                    id: 'offline_cat_' + Date.now() + index,
-                    name: categoryName,
-                    slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-                };
-                fallback.categories.push(category);
+            // 1. Handle Category (DB or Fallback)
+            let categoryId: any = null;
+            let categoryInfo: any = null;
+
+            try {
+                let dbCategory = await CategoryModel.findOne({
+                    $or: [{ name: categoryName }, { slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-') }]
+                });
+
+                if (!dbCategory) {
+                    dbCategory = await CategoryModel.create({
+                        name: categoryName,
+                        slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                    });
+                }
+                categoryId = dbCategory._id;
+                categoryInfo = { _id: dbCategory._id, id: dbCategory._id, name: dbCategory.name, slug: dbCategory.slug };
+            } catch (err) {
+                console.warn('DB error in bulk category handling, using fallback:', categoryName);
+                let fCat = fallback.categories.find(c => c.name === categoryName);
+                if (!fCat) {
+                    fCat = {
+                        _id: 'offline_cat_' + Date.now() + i,
+                        id: 'offline_cat_' + Date.now() + i,
+                        name: categoryName,
+                        slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                    };
+                    fallback.categories.push(fCat);
+                }
+                categoryId = fCat._id;
+                categoryInfo = fCat;
             }
 
             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-            // Image handling (match from ZIP previously uploaded)
-            const imageName = item['Image Name'] || item.images || item.Images;
-            const processedImages = imageName ? (String(imageName)).split(',').map(img => {
-                const trimmed = img.trim();
-                if (trimmed.startsWith('http')) return trimmed;
-                return `${baseUrl}/uploads/${trimmed}`;
-            }) : [];
+            // 2. Handle Images (Link from mapping or use directly)
+            const imageNameHeader = item['Image Name'] || item.images || item.Images;
+            const imagesList = imageNameHeader ? (String(imageNameHeader)).split(',').map(img => img.trim()) : [];
 
-            const product = {
-                _id: 'bulk_' + Date.now() + index,
-                id: 'bulk_' + Date.now() + index,
+            const processedImages = imagesList.map(img => {
+                // If it's already a URL, use it
+                if (img.startsWith('http')) return img;
+                // Otherwise check if we have it in our recent ZIP upload mapping
+                return imageMapping[img] || img;
+            });
+
+            const productData = {
                 name,
                 slug,
                 description: item.Description || item.description || '',
-                price: item.Price || item.price,
                 images: processedImages,
-                categoryId: category?._id || '',
-                category: category || { name: 'Other', slug: 'other' },
+                categoryId: categoryId,
                 specifications: {
-                    dimensions: item.Dimensions || item.dimensions,
-                    material: item.Material || item.material,
-                    ageGroup: item['Age Group'] || item.age_group,
-                    installation: item.Installation || item.installation,
-                    warranty: item.Warranty || item.warranty,
+                    dimensions: item.Dimensions || item.dimensions || '',
+                    material: item.Material || item.material || '',
+                    ageGroup: item['Age Group'] || item.age_group || item.ageGroup || '',
+                    installation: item.Installation || item.installation || '',
+                    warranty: item.Warranty || item.warranty || '',
                     status: item.Status || item.status || 'Active',
-                    price: item.Price || item.price // Store price in specs too for safety
-                },
-                createdAt: new Date().toISOString()
+                }
             };
 
-            newProducts.push(product);
-            fallback.products.push(product);
-        });
+            // 3. Save to DB or Fallback
+            try {
+                // Use upsert by slug
+                await ProductModel.findOneAndUpdate({ slug }, productData, { upsert: true, new: true });
+                newProducts.push({ ...productData, category: categoryInfo });
+            } catch (err) {
+                console.error('DB error in bulk product save, using fallback:', name);
+                const fallbackProduct = {
+                    ...productData,
+                    _id: 'bulk_' + Date.now() + i,
+                    id: 'bulk_' + Date.now() + i,
+                    category: categoryInfo,
+                    createdAt: new Date().toISOString()
+                };
+                fallback.products.push(fallbackProduct);
+                newProducts.push(fallbackProduct);
+            }
+        }
 
         saveFallbackData(fallback);
 
         res.json({
-            message: `Successfully imported ${newProducts.length} products. Existing products preserved.`,
+            message: `Successfully processed ${newProducts.length} products.`,
             count: newProducts.length
         });
     } catch (error) {
@@ -93,23 +130,42 @@ export const bulkUploadImages = async (req: Request, res: Response) => {
         }
 
         const zip = new AdmZip(req.file.buffer);
-        const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+        const zipEntries = zip.getEntries();
+        const results: { originalName: string, url: string }[] = [];
 
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
-        }
+        // Clear old mapping or keep it? User might upload multiple zips. Let's merge.
 
-        zip.extractAllTo(uploadsDir, true);
+        const uploadPromises = zipEntries
+            .filter(entry => !entry.isDirectory && /\.(jpg|jpeg|png|webp|gif)$/i.test(entry.entryName))
+            .map(entry => {
+                return new Promise((resolve) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { folder: 'bulk_uploads' },
+                        (error, result) => {
+                            if (error) {
+                                console.error('Cloudinary upload error for', entry.name, error);
+                                resolve(null);
+                            } else {
+                                const url = result?.secure_url || '';
+                                imageMapping[entry.name] = url;
+                                results.push({ originalName: entry.name, url });
+                                resolve(result);
+                            }
+                        }
+                    );
+                    uploadStream.end(entry.getData());
+                });
+            });
 
-        const entries = zip.getEntries();
-        const filenames = entries.filter(e => !e.isDirectory).map(e => e.entryName);
+        await Promise.all(uploadPromises);
 
         res.json({
-            message: `Successfully extracted ${filenames.length} files`,
-            files: filenames
+            message: `Successfully uploaded ${results.length} images to Cloudinary`,
+            count: results.length,
+            mapping: results
         });
     } catch (error) {
-        console.error('ZIP upload error:', error);
+        console.error('Bulk image upload error:', error);
         res.status(500).json({ message: 'Error processing ZIP file', error });
     }
 };

@@ -2,50 +2,13 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    console.log('Saved theme:', savedTheme);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    console.log('Prefers dark:', prefersDark);
-
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      console.log('Setting dark theme');
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      console.log('Setting light theme');
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    console.log('Toggle theme clicked!');
-    console.log('Current theme state:', isDarkMode);
-    const newTheme = !isDarkMode;
-    console.log('New theme state:', newTheme);
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      console.log('Dark theme applied');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      console.log('Light theme applied');
-    }
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,24 +45,10 @@ export default function Navbar() {
             <Link href="/products" className="text-white/90 hover:text-white font-medium text-sm lg:text-base">Products</Link>
             <Link href="/gallery" className="text-white/90 hover:text-white font-medium text-sm lg:text-base">Gallery</Link>
             <Link href="/about" className="text-white/90 hover:text-white font-medium text-sm lg:text-base">About Us</Link>
-            <Link href="/contact" className="bg-brand-accent text-brand-navy px-4 py-2 sm:px-6 sm:py-2 rounded-full hover:bg-opacity-90 transition font-bold text-sm lg:text-base">Contact</Link>
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? <Sun className="text-white" size={20} /> : <Moon className="text-white" size={20} />}
-            </button>
+            <Link href="/enquiry" className="bg-brand-accent text-brand-navy px-4 py-2 sm:px-6 sm:py-2 rounded-full hover:bg-opacity-90 transition font-bold text-sm lg:text-base">Enquiry</Link>
           </div>
 
           <div className="md:hidden flex items-center space-x-3 text-white">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
             <button onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -114,7 +63,7 @@ export default function Navbar() {
           <Link href="/products" className="block py-2 text-white/90">Products</Link>
           <Link href="/gallery" className="block py-2 text-white/90">Gallery</Link>
           <Link href="/about" className="block py-2 text-white/90">About Us</Link>
-          <Link href="/contact" className="block py-2 text-brand-accent font-bold">Contact</Link>
+          <Link href="/enquiry" className="block py-2 text-brand-accent font-bold">Enquiry</Link>
         </div>
       )}
     </nav>

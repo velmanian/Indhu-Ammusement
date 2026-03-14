@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Filter, Loader2 } from 'lucide-react';
 import { fetchPublic } from '@/lib/api';
+import { FALLBACK_CATEGORIES, FALLBACK_PRODUCTS } from '@/lib/fallbackData';
 
 interface Product {
   _id?: string;
@@ -45,11 +46,25 @@ export default function Products() {
           fetchPublic('/products'),
           fetchPublic('/categories'),
         ]);
-        setProducts(prodData);
-        setCategories(catData);
+
+        if (prodData && prodData.length > 0) {
+          setProducts(prodData);
+        } else {
+          console.log('No products found, using fallback data');
+          setProducts(FALLBACK_PRODUCTS as Product[]);
+        }
+
+        if (catData && catData.length > 0) {
+          setCategories(catData);
+        } else {
+          setCategories(FALLBACK_CATEGORIES);
+        }
       } catch (err) {
-        console.error('Error loading products:', err);
-        setError('Failed to load products. Please refresh the page.');
+        console.error('Error loading products, using fallback data:', err);
+        // Fallback when API fails
+        setProducts(FALLBACK_PRODUCTS as Product[]);
+        setCategories(FALLBACK_CATEGORIES);
+        // setError('Failed to load products. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -245,13 +260,11 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
 
         <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
           <span className="text-brand-primary font-bold text-sm">
-            {product.price || product.specifications?.price
-              ? `₹${product.price || product.specifications?.price}`
-              : 'Price on Enquiry'}
+            Enquiry Only
           </span>
           <button
             onClick={() => {
-              const url = new URL(window.location.origin + '/contact');
+              const url = new URL(window.location.origin + '/enquiry');
               url.searchParams.set('productId', productId);
               window.location.href = url.toString();
             }}

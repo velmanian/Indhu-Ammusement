@@ -28,7 +28,6 @@ export default function ProductModal({
     description: '',
     categoryId: '',
     specifications: '',
-    price: '',
     dimensions: '',
     material: '',
     ageGroup: '',
@@ -62,7 +61,6 @@ export default function ProductModal({
               ? editingProduct.specifications
               : JSON.stringify(editingProduct.specifications, null, 2)
             : '',
-          price: editingProduct.specifications?.price || '',
           dimensions: editingProduct.specifications?.dimensions || '',
           material: editingProduct.specifications?.material || '',
           ageGroup: editingProduct.specifications?.ageGroup || '',
@@ -78,7 +76,6 @@ export default function ProductModal({
           description: '',
           categoryId: '',
           specifications: '',
-          price: '',
           dimensions: '',
           material: '',
           ageGroup: '',
@@ -148,7 +145,6 @@ export default function ProductModal({
             try { return JSON.parse(formData.specifications); }
             catch { return {}; }
           })() : {}),
-          price: formData.price,
           dimensions: formData.dimensions,
           material: formData.material,
           ageGroup: formData.ageGroup,
@@ -264,17 +260,7 @@ export default function ProductModal({
                 />
               </div>
 
-              {/* Price & Dimensions */}
-              <div className="md:col-span-1">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
-                <input
-                  type="text"
-                  value={formData.price}
-                  onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
-                  placeholder="e.g. 10000"
-                />
-              </div>
+              {/* Dimensions */}
               <div className="md:col-span-1">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Dimensions</label>
                 <input

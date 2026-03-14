@@ -1,294 +1,217 @@
+'use client';
+
+import { X, Phone, Mail, MapPin, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { Enquiry } from '@/types';
-import { X, Phone, Mail, MapPin, Clock, CheckCircle, Circle, AlertCircle, Package, Tag } from 'lucide-react';
 
 interface EnquiryDetailModalProps {
   enquiry: Enquiry | null;
-  isOpen: boolean;
   onClose: () => void;
+  onUpdateStatus: (id: any, status: string) => void;
 }
 
-export default function EnquiryDetailModal({ enquiry, isOpen, onClose }: EnquiryDetailModalProps) {
-  if (!isOpen || !enquiry) return null;
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'RESPONDED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'CLOSED':
-        return <Circle className="w-4 h-4 text-gray-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-    }
-  };
+export default function EnquiryDetailModal({ enquiry, onClose, onUpdateStatus }: EnquiryDetailModalProps) {
+  if (!enquiry) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'RESPONDED':
-        return 'bg-green-100 text-green-800';
-      case 'CLOSED':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-red-100 text-red-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'RESPONDED': return 'bg-green-100 text-green-800 border-green-200';
+      case 'CLOSED': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-blue-100 text-blue-800 border-blue-200';
     }
   };
 
-  const handleWhatsAppClick = () => {
-    // Generate WhatsApp URL using the same format as the admin dashboard
-    const phoneNumber = enquiry.phone.replace(/[^0-9]/g, '');
-    const message = `Hello ${encodeURIComponent(enquiry.name)}, we received your enquiry about ${(enquiry.selectedProducts && enquiry.selectedProducts.length > 0 ? enquiry.selectedProducts[0]?.name : enquiry.product?.name || 'our products')} and would like to assist you.`;
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'PENDING': return <Clock size={16} className="mr-1.5" />;
+      case 'RESPONDED': return <CheckCircle size={16} className="mr-1.5" />;
+      case 'CLOSED': return <CheckCircle size={16} className="mr-1.5" />;
+      default: return null;
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      <div 
-        className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <div
+        className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300"
+        onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 rounded-t-2xl">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Enquiry Details</h2>
-              <p className="text-gray-500 text-sm mt-1">ID: {enquiry.id}</p>
+        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-white">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-2xl font-black text-gray-900">Enquiry Details</h2>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center ${getStatusColor(enquiry.status)}`}>
+                {getStatusIcon(enquiry.status)}
+                {enquiry.status}
+              </span>
             </div>
-            <button 
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X size={24} />
-            </button>
+            <p className="text-sm text-gray-500 flex items-center gap-1.5">
+              <Calendar size={14} />
+              Submitted on {new Date(enquiry.createdAt).toLocaleDateString()} at {new Date(enquiry.createdAt).toLocaleTimeString()}
+            </p>
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+          >
+            <X size={24} className="text-gray-400 group-hover:text-gray-600" />
+          </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {/* Customer Information */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="bg-blue-100 p-2 rounded-lg">
-                <UserIcon />
-              </span>
-              Customer Information
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg">
-                  <UserIcon />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-medium">{enquiry.name}</p>
-                </div>
+        <div className="flex-1 overflow-y-auto p-8 space-y-10">
+          {/* Customer Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Customer Name</p>
+              <p className="text-lg font-bold text-gray-900">{enquiry.name}</p>
+            </div>
+            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col justify-center">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Contact Details</p>
+              <div className="space-y-2">
+                <a href={`tel:${enquiry.phone}`} className="flex items-center gap-2 text-blue-900 font-bold hover:underline">
+                  <Phone size={16} /> {enquiry.phone}
+                </a>
+                {enquiry.email && (
+                  <a href={`mailto:${enquiry.email}`} className="flex items-center gap-2 text-blue-900 font-bold hover:underline truncate">
+                    <Mail size={16} /> {enquiry.email}
+                  </a>
+                )}
               </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg">
-                  <Phone size={16} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phone</p>
-                  <p className="font-medium">{enquiry.phone}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg">
-                  <Mail size={16} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{enquiry.email}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-lg">
-                  <MapPin size={16} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="font-medium">{enquiry.location}</p>
-                </div>
+            </div>
+            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Location</p>
+              <div className="flex items-start gap-2 text-gray-700 font-medium">
+                <MapPin size={18} className="text-blue-900 mt-0.5" />
+                <span>{enquiry.location}</span>
               </div>
             </div>
           </div>
 
-          {/* Products & Services */}
-          {(enquiry.selectedProducts || enquiry.product) && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="bg-blue-100 p-2 rounded-lg">
-                  <Package size={16} />
-                </span>
-                Products & Services
-              </h3>
-              
-              {enquiry.selectedProducts && enquiry.selectedProducts.length > 0 && (
-                <div className="space-y-4">
-                  {enquiry.selectedProducts.map((product: any, index: number) => (
-                    <div key={index} className="border border-gray-200 rounded-xl p-4">
-                      <div className="flex gap-4">
-                        {product.image ? (
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                            <img 
-                              src={product.image} 
-                              alt={product.name}
-                              className="w-full h-full object-contain p-1"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/placeholder-image.png';
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                              <circle cx="8.5" cy="8.5" r="1.5"/>
-                              <polyline points="21 15 16 10 5 21"/>
-                            </svg>
-                          </div>
-                        )}
-                        <div>
-                          <h4 className="font-medium text-gray-900">{product.name || product.id || 'Unknown Product'}</h4>
-                          <p className="text-sm text-gray-500">{product.description || 'No description available'}</p>
-                        </div>
+          {/* Selected Products */}
+          <section>
+            <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+              Selected Products
+              <span className="bg-blue-100 text-blue-900 text-sm px-2.5 py-0.5 rounded-full">
+                {enquiry.selectedProducts?.length || (enquiry.product ? 1 : 0)}
+              </span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {enquiry.selectedProducts && enquiry.selectedProducts.length > 0 ? (
+                enquiry.selectedProducts.map((prod: any, idx: number) => (
+                  <div key={idx} className="group bg-white border border-gray-200 rounded-[2rem] overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="aspect-video bg-gray-100 overflow-hidden relative">
+                      <img
+                        src={prod.image || '/placeholder-image.png'}
+                        alt={prod.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase text-blue-900 shadow-sm">
+                          {prod.category?.name || 'Product'}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-              
-              {enquiry.product && !enquiry.selectedProducts && (
-                <div className="border border-gray-200 rounded-xl p-4">
-                  <div className="flex gap-4">
-                    {enquiry.product.images && enquiry.product.images[0] ? (
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <img 
-                          src={enquiry.product.images[0]} 
-                          alt={enquiry.product.name}
-                          className="w-full h-full object-contain p-1"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder-image.png';
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                          <circle cx="8.5" cy="8.5" r="1.5"/>
-                          <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                      </div>
-                    )}
-                    <div>
-                      <h4 className="font-medium text-gray-900">{enquiry.product.name}</h4>
-                      <p className="text-sm text-gray-500">{enquiry.product.description || 'No description available'}</p>
+                    <div className="p-5">
+                      <h4 className="font-black text-gray-900 mb-1">{prod.name}</h4>
                     </div>
                   </div>
+                ))
+              ) : enquiry.product ? (
+                <div className="group bg-white border border-gray-200 rounded-[2rem] overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="aspect-video bg-gray-100 overflow-hidden relative">
+                    <img
+                      src={enquiry.product.images?.[0] || '/placeholder-image.png'}
+                      alt={enquiry.product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-black text-gray-900 mb-1">{enquiry.product.name}</h4>
+                  </div>
+                </div>
+              ) : (
+                <div className="col-span-full py-8 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-medium">
+                  General Inquiry (No specific products selected)
                 </div>
               )}
             </div>
-          )}
+          </section>
 
-          {/* Usage Purpose */}
-          {enquiry.usagePurpose && enquiry.usagePurpose.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="bg-blue-100 p-2 rounded-lg">
-                  <Tag size={16} />
-                </span>
-                Usage Purpose
-              </h3>
-              
-              <div className="flex flex-wrap gap-2">
-                {enquiry.usagePurpose.map((purpose: string, index: number) => (
-                  <span 
-                    key={index}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+          {/* Message and Purpose */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section className="bg-blue-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+                <MessageSquareIcon size={120} />
+              </div>
+              <h3 className="text-xl font-black mb-4 relative z-10">Customer Message</h3>
+              <p className="text-blue-50 leading-relaxed font-medium relative z-10 whitespace-pre-wrap">
+                {enquiry.message || "No specific message provided."}
+              </p>
+            </section>
+
+            <section className="space-y-6">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 mb-4">Usage Purpose</h3>
+                <div className="flex flex-wrap gap-2">
+                  {enquiry.usagePurpose && enquiry.usagePurpose.length > 0 ? (
+                    enquiry.usagePurpose.map((purpose: string, idx: number) => (
+                      <span key={idx} className="bg-green-50 text-green-700 border border-green-100 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2">
+                        <CheckCircle size={14} />
+                        {purpose}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 italic">No usage purpose specified</span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-gray-900 mb-4">Action & Status</h3>
+                <div className="flex flex-wrap gap-3">
+                  <select
+                    value={enquiry.status}
+                    onChange={(e) => onUpdateStatus(enquiry._id || enquiry.id, e.target.value)}
+                    className="flex-1 bg-white border-2 border-gray-200 px-4 py-3 rounded-2xl font-bold text-gray-700 focus:border-blue-900 outline-none transition-all cursor-pointer shadow-sm hover:border-gray-300"
                   >
-                    {purpose}
-                  </span>
-                ))}
+                    <option value="PENDING">Mark as PENDING</option>
+                    <option value="RESPONDED">Mark as RESPONDED</option>
+                    <option value="CLOSED">Mark as CLOSED</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Message */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Message</h3>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <p className="text-gray-700 whitespace-pre-wrap">{enquiry.message}</p>
-            </div>
+            </section>
           </div>
+        </div>
 
-          {/* Status & Timestamp */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(enquiry.status)}
-                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(enquiry.status)}`}>
-                  {enquiry.status}
-                </span>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timestamp</h3>
-              <div className="flex items-center gap-2 text-gray-700">
-                <Clock size={16} />
-                <span>{new Date(enquiry.createdAt).toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleWhatsAppClick}
-              className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl font-bold transition duration-200 flex-1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.502 16.842c-.94-.618-1.826-1.132-2.905-1.132-1.387 0-2.33.722-3.42 2.158-1.957-1.044-3.75-3.419-3.75-5.81 0-3.312 2.96-6.437 6.96-6.437 3.867 0 6.54 2.812 6.54 6.06 0 1.866-.84 3.533-2.375 4.724zm-4.835-9.69c-2.077 0-3.75 1.8-3.75 4 0 1.08.66 2.106 1.83 2.64.3.12.42.3.3.54l-1.02 2.34c-.12.3.06.42.3.48l2.46-.54c.72 0 1.38-.18 1.98-.48.96-.42 1.62-1.26 1.62-2.28 0-2.2-1.68-4-3.75-4z"/><circle cx="10.5" cy="9" r="1"/><circle cx="13.5" cy="9" r="1"/><path d="M18 3H6c-1.657 0-3 1.343-3 3v12c0 1.657 1.343 3 3 3h12c1.657 0 3-1.343 3-3V6c0-1.657-1.343-3-3-3zm.5 15c0 .276-.224.5-.5.5H6c-.276 0-.5-.224-.5-.5V6c0-.276.224-.5.5-.5h12c.276 0 .5.224.5.5v12z"/>
-              </svg>
-              WhatsApp Contact
-            </button>
-            
-            <a 
-              href={`mailto:${enquiry.email}?subject=Regarding your enquiry&body=Hello ${encodeURIComponent(enquiry.name)}, we received your enquiry about ${enquiry.selectedProducts && enquiry.selectedProducts.length > 0 ? enquiry.selectedProducts[0]?.name : enquiry.product?.name || 'our products'} and would like to assist you.`}
-              className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold transition duration-200 flex-1"
-            >
-              <Mail size={18} />
-              Email Contact
-            </a>
-          </div>
+        {/* Footer */}
+        <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-8 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl font-black hover:bg-gray-100 transition-all duration-300 active:scale-95"
+          >
+            Close
+          </button>
+          <a
+            href={`https://wa.me/${enquiry.phone.replace(/[^0-9]/g, '')}`}
+            target="_blank"
+            className="px-8 py-3 bg-[#25D366] text-white rounded-2xl font-black hover:bg-[#128C7E] transition-all duration-300 flex items-center gap-2 active:scale-95 shadow-lg shadow-green-200"
+          >
+            Reply via WhatsApp
+          </a>
         </div>
       </div>
     </div>
   );
 }
 
-// UserIcon helper component since lucide-react doesn't have a direct User icon
-function UserIcon() {
+function MessageSquareIcon({ size }: { size: number }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-      <circle cx="12" cy="7" r="4"></circle>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }

@@ -45,6 +45,17 @@ const productSchema = new mongoose.Schema<IProduct>({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for category to match frontend naming
+productSchema.virtual('category', {
+  ref: 'Category',
+  localField: 'categoryId',
+  foreignField: '_id',
+  justOne: true
 });
 
 export const ProductModel = mongoose.model<IProduct>('Product', productSchema);

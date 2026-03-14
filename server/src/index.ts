@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-import { connectDB } from './lib/database';
+import { connectDB, getIsConnected } from './lib/database';
 import { ensureDefaultAdmin } from './lib/seedAdmin';
 import authRoutes from './routes/auth.routes';
 import publicRoutes from './routes/public.routes';
@@ -31,11 +31,10 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow non-browser tools (no Origin header)
-      if (!origin) {
-        return callback(null, true);
-      }
+      if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Check if origin is localhost or in allowed list
+      if (origin.startsWith('http://localhost:') || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
@@ -88,30 +87,26 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Indhu Industries API is running' });
 });
 
+// Connect to MongoDB and start server independently
+const startServer = () => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🔗 Test endpoint: http://localhost:${PORT}/api/test`);
+    console.log(`📩 Enquiry endpoint: http://localhost:${PORT}/api/public/enquiry`);
+  });
+};
 
+// Start listening immediately
+startServer();
 
-// Connect to MongoDB and start server
+// Then try to connect to DB in the background
 connectDB().then(async () => {
-  // Ensure there is at least one admin user
+  console.log('✅ MongoDB connection check complete');
   await ensureDefaultAdmin();
-
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log('Test endpoint: http://localhost:5000/api/test');
-    console.log('Enquiry endpoint: http://localhost:5000/api/public/enquiry');
-    if (process.env.DATABASE_URL) {
-      console.log('MongoDB connected successfully');
-    } else {
-      console.log('Running in offline mode - some features may be unavailable');
-    }
-  });
+  if (getIsConnected()) {
+    console.log('📡 Database is LIVE');
+  }
 }).catch((error) => {
-  console.error('Failed to connect to MongoDB:', error);
-  console.warn('Server starting without database connectivity...');
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT} (offline mode)`);
-    console.log('Test endpoint: http://localhost:5000/api/test');
-    console.log('Enquiry endpoint: http://localhost:5000/api/public/enquiry');
-    console.log('Running in offline mode - some features may be unavailable');
-  });
+  console.error('❌ Database connection failed:', error.message);
+  console.warn('⚠️ Server is running in OFFLINE MODE');
 });

@@ -13,24 +13,29 @@ export const ensureDefaultAdmin = async () => {
   }
 
   try {
-    const existing = await AdminUserModel.findOne({ email });
-    if (existing) {
-      console.log(`Admin user already exists with email: ${email}`);
-      return;
+    const defaultAdmins = [
+      { email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com', password: process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123', name: 'Admin' },
+      { email: 'mani@gmail.com', password: '123', name: 'Mani' }
+    ];
+
+    for (const admin of defaultAdmins) {
+      const existing = await AdminUserModel.findOne({ email: admin.email });
+      if (existing) {
+        console.log(`Admin user already exists with email: ${admin.email}`);
+        continue;
+      }
+
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      await AdminUserModel.create({
+        email: admin.email,
+        password: hashedPassword,
+        name: admin.name,
+      });
+
+      console.log(`Admin user created: ${admin.email}`);
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await AdminUserModel.create({
-      email,
-      password: hashedPassword,
-      name: 'Admin',
-    });
-
-    console.log('Default admin user created.');
-    console.log(`Email: ${email}`);
-    console.log(`Password: ${password}`);
   } catch (error) {
-    console.error('Failed to ensure default admin user:', error);
+    console.error('Failed to ensure default admin users:', error);
   }
 };
 

@@ -16,7 +16,7 @@ export const getProducts = async (req: Request, res: Response) => {
       }
     }
     try {
-      const products = await ProductModel.find(query).populate('categoryId', 'name slug description image');
+      const products = await ProductModel.find(query).populate('category', 'name slug description image');
       res.json(products);
     } catch (dbError) {
       console.warn('Database is offline, returning fallback products list');
@@ -38,7 +38,7 @@ export const getProductBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
     try {
-      const product = await ProductModel.findOne({ slug: slug as string }).populate('categoryId', 'name slug description image');
+      const product = await ProductModel.findOne({ slug: slug as string }).populate('category', 'name slug description image');
       if (!product) {
         // If not in DB, maybe it's in our fallback?
         const fallback = getFallbackData();

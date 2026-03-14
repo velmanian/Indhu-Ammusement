@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { Loader2, Search, Filter, Camera } from 'lucide-react';
 import { fetchPublic } from '@/lib/api';
 import { Product, Category } from '@/types';
+import { FALLBACK_CATEGORIES, FALLBACK_PRODUCTS } from '@/lib/fallbackData';
 
 export default function Gallery() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS as Product[]);
+    const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);
+    const [loading, setLoading] = useState(false); // Silent loading by default
     const [error, setError] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
@@ -20,11 +21,16 @@ export default function Gallery() {
                     fetchPublic('/products'),
                     fetchPublic('/categories'),
                 ]);
-                setProducts(prodData);
-                setCategories(catData);
+
+                if (prodData && prodData.length > 0) {
+                    setProducts(prodData);
+                }
+                if (catData && catData.length > 0) {
+                    setCategories(catData);
+                }
             } catch (err) {
-                console.error('Error loading gallery:', err);
-                setError('Failed to load gallery images.');
+                console.error('Error loading gallery, using fallback:', err);
+                // Keep the fallback data already in state
             } finally {
                 setLoading(false);
             }
@@ -154,7 +160,7 @@ export default function Gallery() {
                                             {img.productName}
                                         </h3>
                                         <a
-                                            href={`/contact?productId=${img.productId}`}
+                                            href={`/enquiry?productId=${img.productId}`}
                                             className="inline-flex items-center gap-2 bg-white text-brand-navy px-5 py-2.5 rounded-xl font-black text-sm hover:bg-brand-accent transition-colors"
                                         >
                                             Enquire Now

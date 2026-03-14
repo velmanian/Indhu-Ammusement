@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.disconnectDB = exports.connectDB = void 0;
+exports.disconnectDB = exports.getIsConnected = exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -19,15 +19,28 @@ const connectDB = async () => {
         }
         await mongoose_1.default.connect(process.env.DATABASE_URL);
         isConnected = true;
-        console.log('MongoDB connected successfully');
+        console.log('✅ MongoDB connected successfully to Atlas');
     }
     catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-        console.warn('Server will start without database connectivity. Some features may be unavailable.');
-        // Don't exit the process, allow the server to start with limited functionality
+        if (error.message.includes('ECONNREFUSED')) {
+            console.error('❌ Connection Refused: Could not reach MongoDB Atlas. Check your internet or VPN.');
+        }
+        else if (error.message.includes('querySrv ENOTFOUND')) {
+            console.error('❌ DNS Error: Could not resolve MongoDB Atlas hostname. This is likely a network/DNS issue.');
+        }
+        else if (error.message.includes('Authentication failed')) {
+            console.error('❌ Auth Error: Invalid DATABASE_URL credentials.');
+        }
+        else {
+            console.error('❌ MongoDB Connection Error:', error.message);
+        }
+        console.warn('⚠️ Server will continue in OFFLINE MODE (Data will be saved locally to fallbackData.json)');
+        throw error; // Re-throw so index.ts handles the failure
     }
 };
 exports.connectDB = connectDB;
+const getIsConnected = () => isConnected;
+exports.getIsConnected = getIsConnected;
 const disconnectDB = async () => {
     if (!isConnected) {
         return;

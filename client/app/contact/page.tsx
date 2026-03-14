@@ -56,23 +56,31 @@ export default function Contact() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-8 sm:mt-12 bg-brand-light p-6 sm:p-8 rounded-3xl border border-gray-100 border-l-4 sm:border-l-8 border-l-brand-accent">
-                 <p className="text-brand-navy font-medium italic">"We take pride in our quick response time and dedicated customer service. Reach out to us for a custom quote today!"</p>
+                <p className="text-brand-navy font-medium italic">"We take pride in our quick response time and dedicated customer service. Reach out to us for a custom quote today!"</p>
               </div>
             </div>
 
             <div>
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100">
-                <h2 className="text-xl sm:text-2xl font-bold text-brand-navy mb-4 sm:mb-6">Send Product Enquiry</h2>
-                <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Fill out the form below and we'll get back to you shortly.</p>
-                <ContactForm />
+              <div className="bg-white p-8 sm:p-12 rounded-[32px] shadow-[0_32px_120px_-20px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-brand-light text-brand-primary rounded-2xl flex items-center justify-center mb-6">
+                  <Mail size={32} />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-brand-navy mb-4">Product Enquiries</h2>
+                <p className="text-gray-500 mb-10 max-w-sm">Use our dedicated professional enquiry portal to get a custom quote for your project.</p>
+                <a
+                  href="/enquiry"
+                  className="w-full py-5 px-8 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-brand-primary/20 hover:bg-brand-navy transition-all"
+                >
+                  Submit Form for Enquiry
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
-      
+
       {/* Map Placeholder */}
       <section className="h-96 bg-gray-200">
         <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">

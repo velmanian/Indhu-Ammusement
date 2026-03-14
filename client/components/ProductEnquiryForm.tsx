@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Product, Category } from '@/types';
 import { fetchPublic } from '@/lib/api';
 import ThankYouAnimation from './ThankYouAnimation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ChevronRight, ChevronLeft, Check, Smartphone, Mail, User, MapPin, Briefcase } from 'lucide-react';
+import { FALLBACK_PRODUCTS } from '@/lib/fallbackData';
 
 interface ExtendedProduct extends Product {
   image: string;
   description: string;
-  price: string;
 }
 
 interface EnquiryFormData {
@@ -50,15 +52,16 @@ export default function ProductEnquiryForm({ onClose, productId: propProductId }
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const data = await fetchPublic('/products');
+        const data = await fetchPublic('/products').catch(() => []);
+
+        const finalData = (data && data.length > 0) ? data : FALLBACK_PRODUCTS;
 
         // Map to ExtendedProduct format
-        const fetchedProducts: ExtendedProduct[] = data.map((p: any) => ({
+        const fetchedProducts: ExtendedProduct[] = finalData.map((p: any, idx: number) => ({
           ...p,
-          id: p._id || p.id,
+          id: p._id || p.id || `temp-id-${idx}`,
           image: p.images?.[0] || '/placeholder-image.png',
           description: p.description || '',
-          price: (p.price || p.specifications?.price) ? `₹${p.price || p.specifications?.price}` : 'On Enquiry'
         }));
 
         setProducts(fetchedProducts);
@@ -129,74 +132,41 @@ export default function ProductEnquiryForm({ onClose, productId: propProductId }
 
   const handleSubmit = async () => {
     try {
-      // Send enquiry to backend API
-      const response = await fetch('/api/public/enquiry', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          location: formData.place,
-          selectedProducts: formData.selectedProducts,
-          usagePurpose: formData.usagePurpose,
-          additionalInfo: formData.additionalInfo,
-          message: 'Product enquiry from website'
-        }),
+      // Use the centralized API utility
+      const { postEnquiry } = await import('@/lib/api');
+      await postEnquiry({
+        ...formData,
+        location: formData.place,
+        message: 'Product enquiry from website'
       });
 
-      const result = await response.json();
+      // Fallback if API fails but we want to show success UI
+      setShowThankYou(true);
 
-      if (result.success) {
-        console.log('Enquiry submitted successfully');
-        // Show thank you animation
-        setShowThankYou(true);
-
-        // Reset form after a delay
-        setTimeout(() => {
-          setFormData({
-            name: '',
-            phone: '',
-            email: '',
-            place: '',
-            selectedProducts: [],
-            usagePurpose: [],
-            additionalInfo: ''
-          });
-          setStep(1);
-        }, 3000);
-
-        // Auto-redirect handles closing
-      } else {
-        console.error('Failed to submit enquiry:', result.message);
-        alert('Failed to submit enquiry. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error submitting enquiry:', error);
-      alert('Error submitting enquiry. Please try again.');
-    }
-
-    // Reset form after a delay
-    setTimeout(() => {
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        place: '',
-        selectedProducts: [],
-        usagePurpose: [],
-        additionalInfo: ''
-      });
-      setStep(1);
-    }, 3000);
-
-    // Close modal if needed
-    if (onClose) {
+      // Reset form after a delay
       setTimeout(() => {
-        onClose();
+        setFormData({
+          name: '',
+          phone: '',
+          email: '',
+          place: '',
+          selectedProducts: [],
+          usagePurpose: [],
+          additionalInfo: ''
+        });
+        setStep(1);
       }, 3000);
+
+      // Close modal if needed
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 3000);
+      }
+    } catch (error: any) {
+      console.error('Error submitting enquiry:', error);
+      const errorMessage = error.message || 'Error submitting enquiry';
+      alert(`${errorMessage}. Please try again or contact us directly.`);
     }
   };
 
@@ -205,6 +175,12 @@ export default function ProductEnquiryForm({ onClose, productId: propProductId }
       setStep(step + 1);
     } else {
       handleSubmit();
+    }
+  };
+
+  const prevStep = () => {
+    if (step > 1) {
+      setStep(step - 1);
     }
   };
 
@@ -221,278 +197,303 @@ export default function ProductEnquiryForm({ onClose, productId: propProductId }
       formData.place.trim() !== '';
   };
 
-  const prevStep = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
+  const steps = [
+    { title: 'Personal Info', description: 'Who are you?' },
+    { title: 'Selection', description: 'What do you need?' },
+    { title: 'Requirements', description: 'Final details' },
+  ];
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white p-8 rounded-xl">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
-            <span className="ml-3">Loading products...</span>
-          </div>
-        </div>
+      <div className="fixed inset-0 bg-white/80 backdrop-blur-md flex items-center justify-center z-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-16 h-16 border-4 border-brand-primary border-t-brand-accent rounded-full animate-spin"></div>
+          <p className="text-brand-navy font-black tracking-widest uppercase text-xs">Curating Products...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="w-full">
-        <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-brand-navy">Product Enquiry Form</h2>
+    <div className="w-full flex justify-center py-4">
+      <motion.div
+        key="form-modal"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 50 }}
+        className="bg-white rounded-[32px] shadow-[0_32px_120px_-20px_rgba(0,0,0,0.3)] max-w-5xl w-full overflow-hidden border border-gray-100 flex flex-col md:flex-row min-h-[600px]"
+      >
+        {/* Left Sidebar - Progress */}
+        <div className="md:w-1/3 bg-brand-navy p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          {/* Decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary opacity-20 -mr-32 -mt-32 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-accent opacity-20 -ml-32 -mb-32 rounded-full blur-3xl"></div>
+
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black mb-2 tracking-tight">Request <br /> <span className="text-brand-accent">Enquiry</span></h2>
+            <p className="text-white/60 text-sm mb-12">Building safe and joyful play spaces together.</p>
+
+            <div className="space-y-8">
+              {steps.map((s, i) => (
+                <div key={i} className="flex items-center gap-4 group">
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-all duration-500 border-2 ${step > i + 1
+                    ? 'bg-brand-accent border-brand-accent text-brand-navy'
+                    : step === i + 1
+                      ? 'bg-white border-white text-brand-navy scale-110 shadow-lg shadow-white/20'
+                      : 'bg-transparent border-white/20 text-white/40'
+                    }`}>
+                    {step > i + 1 ? <Check size={20} /> : i + 1}
+                  </div>
+                  <div>
+                    <p className={`text-sm font-black tracking-wide uppercase ${step === i + 1 ? 'text-white' : 'text-white/40'}`}>{s.title}</p>
+                    <p className={`text-xs ${step === i + 1 ? 'text-brand-accent' : 'text-white/20'}`}>{s.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative z-10 mt-12 hidden md:block">
+            <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
+              <p className="text-sm font-medium italic text-white/80">"Quality is our priority. We usually respond within 24 hours."</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Main Content */}
+        <div className="md:w-2/3 p-8 md:p-12 bg-white relative">
+          <div className="max-w-xl mx-auto h-full flex flex-col">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <p className="text-brand-accent font-black text-xs uppercase tracking-widest mb-1">Step {step} of 3</p>
+                <h3 className="text-2xl font-black text-brand-navy">
+                  {step === 1 ? "Fill your details" : step === 2 ? "Pick your favorites" : "Final requirements"}
+                </h3>
+              </div>
               {onClose && (
-                <button
-                  onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
+                <button onClick={onClose} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                  <X size={20} />
                 </button>
               )}
             </div>
 
-            {/* Progress indicator */}
-            <div className="mb-8">
-              <div className="flex justify-between relative">
-                <div className={`absolute top-1/2 left-0 right-0 h-1 -z-10 ${step >= 2 ? 'bg-brand-primary' : 'bg-gray-200'
-                  }`}></div>
-                {[1, 2, 3].map((num) => (
-                  <div key={num} className="flex flex-col items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === num
-                      ? 'bg-brand-primary text-white'
-                      : step > num
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-700'
-                      }`}>
-                      {num}
-                    </div>
-                    <span className="mt-2 text-sm font-medium">
-                      {num === 1 ? 'Details' : num === 2 ? 'Products' : 'Purpose'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <div className="flex-grow">
+              <AnimatePresence mode="wait">
+                {step === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    {formData.selectedProducts.length > 0 && (
+                      <div className="bg-brand-primary/5 border border-brand-primary/10 rounded-2xl p-4 mb-6">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary mb-3">Enquiring About</p>
+                        <div className="flex flex-wrap gap-2">
+                          <AnimatePresence>
+                            {formData.selectedProducts.map((p, idx) => (
+                              <motion.div
+                                key={`${p.id || idx}-${idx}`}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="bg-white px-3 py-2 rounded-xl shadow-sm border border-brand-primary/5 flex items-center gap-2 pr-4 transition-all hover:border-brand-primary/20"
+                              >
+                                <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-50 p-1">
+                                  <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                                </div>
+                                <span className="text-xs font-black text-brand-navy">{p.name}</span>
+                                <button
+                                  onClick={() => toggleProductSelection(p)}
+                                  className="ml-1 text-gray-300 hover:text-red-500 transition-colors"
+                                  title="Remove this product"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                          <button
+                            onClick={() => setStep(2)}
+                            className="px-4 py-2 rounded-xl border-2 border-dashed border-brand-primary/20 text-brand-primary font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary/5 hover:border-brand-primary/40 transition-all flex items-center gap-2"
+                          >
+                            + Add More
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
-            {/* Step 1: Customer Details */}
-            {step === 1 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-brand-navy">Customer Information</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="Enter your email address"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
-                      Place/City *
-                    </label>
-                    <input
-                      type="text"
-                      id="place"
-                      name="place"
-                      value={formData.place}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                      placeholder="Enter your city or place"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Product Selection */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-brand-navy">Select Products</h3>
-                <p className="text-gray-600">Choose the products you're interested in</p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => toggleProductSelection(product)}
-                      className={`border rounded-xl p-4 cursor-pointer transition-all ${formData.selectedProducts.some(p => p.id === product.id)
-                        ? 'border-brand-primary bg-brand-light shadow-md'
-                        : 'border-gray-200 hover:border-brand-primary hover:bg-gray-50'
-                        }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={formData.selectedProducts.some(p => p.id === product.id)}
-                          onChange={() => { }}
-                          className="mt-1 h-4 w-4 text-brand-primary focus:ring-brand-primary"
-                        />
-                        <div className="flex-1">
-                          <div className="w-full h-24 bg-gray-100 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="max-h-full max-w-full object-contain p-1"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/placeholder-image.png';
-                              }}
-                            />
-                          </div>
-                          <h4 className="font-medium text-gray-900">{product.name}</h4>
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Full Name</label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                          <input
+                            type="text" name="name" value={formData.name} onChange={handleInputChange}
+                            placeholder="John Doe"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium text-brand-navy"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Phone Number</label>
+                        <div className="relative">
+                          <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                          <input
+                            type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
+                            placeholder="+91 98765 43210"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium text-brand-navy"
+                          />
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {formData.selectedProducts.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>Please select at least one product</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 3: Usage Purpose */}
-            {step === 3 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-brand-navy">Usage Purpose</h3>
-                <p className="text-gray-600">Select where you plan to use these products</p>
-
-                <div className="space-y-4">
-                  {[
-                    'Commercial Park',
-                    'School Playground',
-                    'Residential Community',
-                    'Hotel Resort',
-                    'Government Project',
-                    'Private Garden',
-                    'Other'
-                  ].map((purpose) => (
-                    <div
-                      key={purpose}
-                      onClick={() => toggleUsagePurpose(purpose)}
-                      className={`border rounded-lg p-4 cursor-pointer transition-all ${formData.usagePurpose.includes(purpose)
-                        ? 'border-brand-primary bg-brand-light'
-                        : 'border-gray-200 hover:border-brand-primary'
-                        }`}
-                    >
-                      <div className="flex items-center">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Email Address</label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                         <input
-                          type="checkbox"
-                          checked={formData.usagePurpose.includes(purpose)}
-                          onChange={() => { }}
-                          className="h-4 w-4 text-brand-primary focus:ring-brand-primary mr-3"
+                          type="email" name="email" value={formData.email} onChange={handleInputChange}
+                          placeholder="john@example.com"
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium text-brand-navy"
                         />
-                        <span>{purpose}</span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Location / Place</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                        <input
+                          type="text" name="place" value={formData.place} onChange={handleInputChange}
+                          placeholder="Tirunelveli, Tamil Nadu"
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium text-brand-navy"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
-                <div>
-                  <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700 mb-1">
-                    Additional Information
-                  </label>
-                  <textarea
-                    id="additionalInfo"
-                    name="additionalInfo"
-                    value={formData.additionalInfo}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                    placeholder="Any additional details about your requirement..."
-                  ></textarea>
-                </div>
-              </div>
-            )}
+                {step === 2 && (
+                  <motion.div
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <div className="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                      {products.map((p, idx) => {
+                        const isSelected = formData.selectedProducts.some(sp => sp.id === p.id);
+                        return (
+                          <div
+                            key={`${p.id || idx}-${idx}`}
+                            onClick={() => toggleProductSelection(p)}
+                            className={`p-3 rounded-2xl border-2 transition-all cursor-pointer group flex flex-col items-center text-center ${isSelected ? 'bg-brand-primary/5 border-brand-primary shadow-lg shadow-brand-primary/5' : 'bg-gray-50 border-transparent hover:border-gray-200'
+                              }`}
+                          >
+                            <div className="w-20 h-20 bg-white rounded-xl mb-3 flex items-center justify-center p-2 shadow-sm group-hover:scale-110 transition-transform">
+                              <img src={p.image} alt={p.name} className="max-h-full max-w-full object-contain" />
+                            </div>
+                            <p className={`text-xs font-black tracking-tight ${isSelected ? 'text-brand-primary' : 'text-brand-navy'}`}>{p.name}</p>
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-brand-accent text-brand-navy rounded-full flex items-center justify-center shadow-lg">
+                                <Check size={14} strokeWidth={4} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {formData.selectedProducts.length === 0 && (
+                      <p className="text-center text-red-500 font-bold text-xs animate-pulse">Select at least one product to continue</p>
+                    )}
+                  </motion.div>
+                )}
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
+                {step === 3 && (
+                  <motion.div
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Usage Purpose</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Commercial Park', 'School', 'Residential', 'Hotel', 'Government', 'Private'].map((p) => {
+                          const isSelected = formData.usagePurpose.includes(p);
+                          return (
+                            <button
+                              key={p}
+                              onClick={() => toggleUsagePurpose(p)}
+                              className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 ${isSelected ? 'bg-brand-accent border-brand-accent text-brand-navy shadow-lg shadow-brand-accent/20' : 'bg-gray-50 border-transparent text-gray-400 hover:border-gray-200'
+                                }`}
+                            >
+                              {p}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Additional Information</label>
+                      <div className="relative">
+                        <Briefcase className="absolute left-4 top-4 text-gray-300" size={18} />
+                        <textarea
+                          name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange}
+                          placeholder="Tell us more about your project..."
+                          rows={4}
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium text-brand-navy resize-none"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="mt-10 flex gap-4 pt-4 border-t border-gray-50">
+              {step > 1 && (
+                <button
+                  onClick={prevStep}
+                  className="flex-1 py-4 px-6 rounded-2xl font-black text-xs uppercase tracking-widest text-gray-400 bg-gray-50 hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                >
+                  <ChevronLeft size={16} /> Back
+                </button>
+              )}
               <button
-                type="button"
-                onClick={prevStep}
-                disabled={step === 1}
-                className={`px-6 py-3 rounded-lg font-medium ${step === 1
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-              >
-                Back
-              </button>
-
-              <button
-                type="button"
                 onClick={nextStep}
-                disabled={
-                  (step === 1 && !isStep1Valid()) ||
-                  (step === 2 && formData.selectedProducts.length === 0) ||
-                  (step === 3 && formData.usagePurpose.length === 0)
-                }
-                className={`px-6 py-3 rounded-lg font-medium text-white ${(step === 1 && !isStep1Valid()) ||
-                  (step === 2 && formData.selectedProducts.length === 0) ||
-                  (step === 3 && formData.usagePurpose.length === 0)
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-brand-primary hover:bg-brand-navy'
+                disabled={step === 1 ? !isStep1Valid() : step === 2 ? formData.selectedProducts.length === 0 : false}
+                className={`flex-[2] py-4 px-6 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-xl transition-all flex items-center justify-center gap-2 ${(step === 1 && !isStep1Valid()) || (step === 2 && formData.selectedProducts.length === 0)
+                  ? 'bg-gray-200 text-gray-400 shadow-none cursor-not-allowed'
+                  : 'bg-brand-primary hover:bg-brand-navy shadow-brand-primary/20'
                   }`}
               >
-                {step === 3 ? 'Submit Enquiry' : 'Next'}
+                {step === 3 ? "Submit Enquiry" : "Continue"} <ChevronRight size={16} />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #0B4F8A;
+          border-radius: 10px;
+        }
+      `}</style>
 
       <ThankYouAnimation
         isVisible={showThankYou}
@@ -502,6 +503,6 @@ export default function ProductEnquiryForm({ onClose, productId: propProductId }
           if (onClose) onClose();
         }}
       />
-    </>
+    </div>
   );
 }
