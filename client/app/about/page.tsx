@@ -1,3 +1,19 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "About Us | Indhu Amusement Ride Industries",
+  description: "Learn about our 10+ years of excellence in manufacturing amusement rides and playground equipment with a commitment to quality and safety.",
+  keywords: [
+    "Amusement Ride Manufacturer History",
+    "Indhu Industries Founders",
+    "Tirunelveli Manufacturing Unit",
+    "Quality Standards Play Equipment"
+  ],
+  alternates: {
+    canonical: '/about',
+  },
+};
+
 export default function About() {
   const stats = [
     { value: "10+", label: "Years of Excellence" },

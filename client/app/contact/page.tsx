@@ -1,3 +1,19 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Contact Us | Indhu Amusement Ride Industries",
+  description: "Get in touch for custom playground designs, amusement ride manufacturing, or project enquiries. Located in Tirunelveli, Tamil Nadu.",
+  keywords: [
+    "Contact Playground Manufacturer",
+    "Indhu Industries Address",
+    "Tirunelveli Play Equipment Factory",
+    "Amusement Ride Quote"
+  ],
+  alternates: {
+    canonical: '/contact',
+  },
+};
+
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import ContactForm from '@/components/ContactForm';
 

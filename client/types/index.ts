@@ -17,6 +17,7 @@ export interface Product {
   images?: string[];
   category?: Category;
   categoryId?: string | number;
+  price?: number | string;
 }
 
 export interface Enquiry {
