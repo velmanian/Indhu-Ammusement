@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { fetchPublic } from '@/lib/api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://indhuamusement.com';
+  const baseUrl = 'https://indhu-ammusement.vercel.app';
 
   // Fetch products for dynamic routes
   let products = [];

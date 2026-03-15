@@ -44,14 +44,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://indhuamusement.com'), // Replace with actual domain if known
+  metadataBase: new URL('https://indhu-ammusement.vercel.app'), // Replace with actual domain if known
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Indhu Amusement Ride Industries | Manufacturer of Playground & Park Equipment",
     description: "High-quality FRP slides, swings, outdoor gym equipment, and more for parks and schools.",
-    url: 'https://indhuamusement.com',
+    url: 'https://indhu-ammusement.vercel.app',
     siteName: 'Indhu Amusement Ride Industries',
     locale: 'en_IN',
     type: 'website',
@@ -71,7 +71,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "Indhu Amusement Ride Industries",
-  "image": "https://indhuamusement.com/logo.png",
+  "image": "https://indhu-ammusement.vercel.app/logo.png",
   "description": "Leading manufacturer of FRP slides, swings, and premium amusement equipment in Tirunelveli, Tamil Nadu.",
   "address": {
     "@type": "PostalAddress",
@@ -86,7 +86,7 @@ const jsonLd = {
     "latitude": 8.707416,
     "longitude": 77.742511
   },
-  "url": "https://indhuamusement.com",
+  "url": "https://indhu-ammusement.vercel.app",
   "telephone": "+919382308899",
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
