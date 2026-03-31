@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Shield, Target, Globe, ChevronRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: "About Us | Indhu Amusement Ride Industries",
@@ -22,57 +23,6 @@ export default function About() {
     { value: "50K+", label: "Children Delighted" },
   ];
 
-  const testimonials = [
-    {
-      name: "Mr. Rajasekaran",
-      title: "Director, Tamil Nadu Tourism Development Corporation",
-      quote:
-        "Indhu Industries delivered exceptional FRP slides and park equipment for our coastal resort project in Rameswaram. The quality, finish, and on-time delivery exceeded our expectations. A truly professional team.",
-      project: "Government Tourism Resort, Rameswaram",
-      type: "Government",
-    },
-    {
-      name: "Ms. Priya Mohan",
-      title: "General Manager, Silverine Resorts & Spa",
-      quote:
-        "We chose Indhu for our luxury resort's kids zone, and it was the best decision. The custom FRP equipment blends seamlessly with our premium aesthetic. Parents and children absolutely love it.",
-      project: "Silverine Resorts Kids Zone, Ooty",
-      type: "Resort",
-    },
-    {
-      name: "Mr. Venkatesh Kumar",
-      title: "Commissioner, Coimbatore City Municipal Corporation",
-      quote:
-        "Our Smart City park initiative required high-durability, weather-resistant play structures. Indhu Industries not only met the specifications but also provided excellent post-installation support.",
-      project: "Smart City Park, Coimbatore",
-      type: "Government",
-    },
-    {
-      name: "Mrs. Deepa Suresh",
-      title: "Operations Head, Palm Meadows Club",
-      quote:
-        "The entire playground setup was crafted with precision and care. Every piece reflects top-tier craftsmanship. Our members are delighted, and we've received glowing feedback from families.",
-      project: "Palm Meadows Residential Club, Bengaluru",
-      type: "Private",
-    },
-    {
-      name: "Mr. Arumugam",
-      title: "Executive Engineer, TNRD",
-      quote:
-        "We have awarded three consecutive tenders to Indhu Industries for district park development. Their consistency in quality and adherence to government standards is commendable.",
-      project: "District Parks, Tirunelveli & Thoothukudi",
-      type: "Government",
-    },
-    {
-      name: "Ms. Kavitha Nair",
-      title: "Property Manager, Seagreen Beach Resort",
-      quote:
-        "From concept to completion, Indhu's team was professional and creative. The marine-grade FRP structures have held up beautifully in our coastal environment. Highly recommended.",
-      project: "Seagreen Beach Resort, Kovalam",
-      type: "Resort",
-    },
-  ];
-
   const clients = [
     { name: "Tamil Nadu Tourism", type: "Government" },
     { name: "Smart City Mission", type: "Government" },
@@ -91,160 +41,38 @@ export default function About() {
   };
 
   return (
-    <div
-      className="bg-white"
-      style={
-        {
-          "--brand-primary": "#1a5c96",
-          "--brand-navy": "#0d2b45",
-          "--brand-accent": "#f59e0b",
-          "--brand-light": "#eef4fb",
-        } as React.CSSProperties
-      }
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        .font-display { font-family: 'Cormorant Garamond', serif; }
-        .font-body { font-family: 'DM Sans', sans-serif; }
-
-        .brand-primary { color: #1a5c96; }
-        .brand-navy { color: #0d2b45; }
-        .brand-accent { color: #f59e0b; }
-        .bg-brand-primary { background-color: #1a5c96; }
-        .bg-brand-navy { background-color: #0d2b45; }
-        .bg-brand-accent { background-color: #f59e0b; }
-        .bg-brand-light { background-color: #eef4fb; }
-        .text-brand-light { color: #eef4fb; }
-        .text-brand-primary { color: #1a5c96; }
-        .text-brand-navy { color: #0d2b45; }
-        .text-brand-accent { color: #f59e0b; }
-        .border-brand-accent { border-color: #f59e0b; }
-        .border-brand-primary { border-color: #1a5c96; }
-        .border-t-brand-primary { border-top-color: #1a5c96; }
-        .border-t-brand-accent { border-top-color: #f59e0b; }
-
-        .hero-bg {
-          background: linear-gradient(135deg, #0d2b45 0%, #1a5c96 60%, #1e6aab 100%);
-          position: relative;
-          overflow: hidden;
-        }
-        .hero-bg::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background-image: radial-gradient(circle at 20% 80%, rgba(245,158,11,0.15) 0%, transparent 50%),
-                            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);
-        }
-        .hero-bg::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0; right: 0;
-          height: 80px;
-          background: white;
-          clip-path: ellipse(55% 100% at 50% 100%);
-        }
-
-        .gold-line {
-          width: 64px;
-          height: 3px;
-          background: linear-gradient(90deg, #f59e0b, #fcd34d);
-          border-radius: 2px;
-          margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-          border-top: 3px solid #f59e0b;
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        .stat-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 40px rgba(26,92,150,0.12);
-        }
-
-        .testimonial-card {
-          border-left: 4px solid #f59e0b;
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        .testimonial-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 40px rgba(13,43,69,0.1);
-        }
-
-        .client-badge {
-          transition: transform 0.2s ease;
-        }
-        .client-badge:hover {
-          transform: scale(1.04);
-        }
-
-        .quote-mark {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 5rem;
-          line-height: 1;
-          color: #f59e0b;
-          opacity: 0.4;
-          position: absolute;
-          top: -10px;
-          left: 20px;
-        }
-
-        .section-label {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.75rem;
-          font-weight: 600;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: #f59e0b;
-          margin-bottom: 0.75rem;
-        }
-
-        .zigzag-divider {
-          width: 100%;
-          height: 40px;
-          background: white;
-          clip-path: polygon(0 0, 4% 100%, 8% 0, 12% 100%, 16% 0, 20% 100%, 24% 0, 28% 100%, 32% 0, 36% 100%, 40% 0, 44% 100%, 48% 0, 52% 100%, 56% 0, 60% 100%, 64% 0, 68% 100%, 72% 0, 76% 100%, 80% 0, 84% 100%, 88% 0, 92% 100%, 96% 0, 100% 100%, 100% 0);
-        }
-      `}</style>
-
+    <div className="bg-white font-sans overflow-hidden">
       {/* HERO */}
-      <section className="hero-bg text-white py-20 sm:py-32 pb-24 sm:pb-36 font-body">
+      <section className="bg-gradient-to-br from-brand-navy via-brand-primary to-brand-secondary text-white py-20 sm:py-32 pb-24 sm:pb-36 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(198,211,0,0.15),transparent_50%),radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.05),transparent_40%)]"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center sm:text-left">
           <div className="max-w-4xl">
-            <p className="section-label" style={{ color: "#fcd34d" }}>Our Story</p>
-            <h1
-              className="font-display mb-8"
-              style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 700, lineHeight: 1.1 }}
-            >
-              Crafting <span style={{ color: "#f59e0b" }}>Joyful Spaces</span> <br />
+            <p className="text-brand-accent font-black tracking-widest uppercase text-xs sm:text-sm mb-4">Our Story</p>
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black mb-8 leading-[1.1] tracking-tight">
+              Crafting <span className="text-brand-accent">Joyful Spaces</span> <br />
               Across India
             </h1>
-            <p
-              className="text-brand-light opacity-90 max-w-xl sm:mx-0 mx-auto leading-relaxed text-base sm:text-lg"
-            >
+            <p className="text-white/80 max-w-xl sm:mx-0 mx-auto leading-relaxed text-lg sm:text-xl">
               From government parks to luxury resorts — Indhu Industries has built India's most trusted name in FRP amusement equipment, one joyful installation at a time.
             </p>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-white" style={{ clipPath: 'ellipse(55% 100% at 50% 100%)' }}></div>
       </section>
 
       {/* STATS BAND */}
-      <section className="py-12 sm:py-20 font-body relative -mt-16 sm:-mt-24 z-20">
+      <section className="py-12 sm:py-20 relative -mt-16 sm:-mt-24 z-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="stat-card bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center shadow-2xl border border-gray-100"
+                className="bg-white rounded-[2rem] p-6 sm:p-10 text-center shadow-2xl shadow-brand-primary/10 border border-gray-100 border-t-4 border-t-brand-accent transform hover:-translate-y-1 transition-all duration-300"
               >
-                <p
-                  className="font-display font-bold brand-accent mb-1 sm:mb-2"
-                  style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1 }}
-                >
+                <p className="text-4xl sm:text-5xl lg:text-6xl font-black text-brand-navy mb-2 tracking-tighter">
                   {s.value}
                 </p>
-                <p className="text-gray-400 text-[10px] sm:text-sm font-black uppercase tracking-widest">{s.label}</p>
+                <p className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{s.label}</p>
               </div>
             ))}
           </div>
@@ -252,69 +80,51 @@ export default function About() {
       </section>
 
       {/* OUR JOURNEY */}
-      <section className="py-20 font-body" style={{ background: "#eef4fb" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-brand-light/50">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Image side */}
             <div className="relative order-2 lg:order-1">
-              <div
-                className="rounded-3xl overflow-hidden shadow-2xl aspect-square"
-                style={{ background: "#c8ddf0" }}
-              >
+              <div className="rounded-[3rem] overflow-hidden shadow-2xl aspect-square bg-brand-light border-4 border-white">
                 <img
                   src="https://images.unsplash.com/photo-1572013175023-73010b1473f3?auto=format&fit=crop&q=80&w=800"
-                  alt="Indhu Industries manufacturing"
-                  className="w-full h-full object-cover"
-                  style={{ opacity: 0.9 }}
+                  alt="Manufacturing"
+                  className="w-full h-full object-cover opacity-90 mix-blend-multiply"
                 />
               </div>
-              <div
-                className="absolute -bottom-6 -right-6 rounded-2xl text-white p-6 shadow-xl hidden lg:block"
-                style={{
-                  background: "linear-gradient(135deg, #0d2b45, #1a5c96)",
-                  borderLeft: "5px solid #f59e0b",
-                  maxWidth: "260px",
-                }}
-              >
-                <p className="font-display text-lg font-semibold leading-snug">
+              <div className="absolute -bottom-6 -right-6 rounded-3xl bg-gradient-to-br from-brand-navy to-brand-primary text-white p-8 shadow-2xl border-l-8 border-brand-accent max-w-[280px] hidden lg:block">
+                <p className="text-xl font-bold leading-tight italic">
                   "Excellence in every ride we build."
                 </p>
-                <p className="text-xs opacity-60 mt-2">— Indhu Industries Founding Promise</p>
+                <p className="text-xs text-white/60 mt-3 font-semibold uppercase tracking-widest">— Indhu Industries Promise</p>
               </div>
             </div>
 
-            {/* Text side */}
             <div className="order-1 lg:order-2">
-              <p className="section-label">Who We Are</p>
-              <div className="gold-line"></div>
-              <h2
-                className="font-display font-bold brand-navy mb-6"
-                style={{ fontSize: "clamp(2rem, 4vw, 3rem)", lineHeight: 1.2 }}
-              >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-1 w-12 bg-brand-accent rounded-full"></div>
+                <span className="text-brand-accent font-black tracking-widest uppercase text-xs">Who We Are</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-brand-navy mb-8 leading-tight">
                 Our Journey
               </h2>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                Founded in Tirunelveli, Tamil Nadu, Indhu Amusement Ride Industries started with a
-                simple mission: to create safe, durable, and innovative play solutions for children.
-                Today, we are one of the leading manufacturers of FRP slides, swings, and park
-                equipment in India.
-              </p>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Our state-of-the-art manufacturing unit combines traditional craftsmanship with
-                modern technology to deliver products that withstand the test of time and weather.
-                We have proudly served government municipal corporations, national tourism boards,
-                five-star resorts, and private residential communities alike.
-              </p>
-              <div
-                className="rounded-xl p-5 flex gap-4 items-start"
-                style={{ background: "#fff", border: "1px solid #d1e3f0" }}
-              >
-                <span style={{ fontSize: "2rem" }}>🏛️</span>
+              <div className="space-y-6 text-gray-600 text-lg sm:text-xl leading-relaxed">
+                <p>
+                  Founded in Tirunelveli, Tamil Nadu, Indhu Amusement Ride Industries started with a
+                  simple mission: to create safe, durable, and innovative play solutions for children.
+                  Today, we are one of the leading manufacturers of FRP slides, swings, and park
+                  equipment in India.
+                </p>
+                <p>
+                  Our state-of-the-art manufacturing unit combines traditional craftsmanship with
+                  modern technology to deliver products that withstand the test of time and weather.
+                </p>
+              </div>
+              <div className="mt-10 bg-white p-6 rounded-3xl border border-brand-primary/10 flex gap-5 items-center shadow-sm">
+                <div className="w-16 h-16 bg-brand-light rounded-2xl flex items-center justify-center text-3xl shadow-inner">🏛️</div>
                 <div>
-                  <p className="font-semibold brand-navy text-sm mb-1">Government & Institutional Trust</p>
-                  <p className="text-gray-500 text-sm">
-                    Empanelled with multiple municipal corporations and state tourism departments for
-                    park infrastructure development under Smart City and AMRUT missions.
+                  <p className="font-black text-brand-navy text-sm sm:text-base mb-1">Government & Institutional Trust</p>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Empanelled with multiple municipal corporations and state tourism departments for infrastructure development.
                   </p>
                 </div>
               </div>
@@ -324,40 +134,30 @@ export default function About() {
       </section>
 
       {/* MISSION & VISION */}
-      <section className="py-20 sm:py-32 font-body bg-white">
+      <section className="py-24 sm:py-36 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 sm:mb-24">
-            <p className="section-label">What Drives Us</p>
-            <div className="gold-line mx-auto"></div>
-            <h2
-              className="font-display font-bold brand-navy"
-              style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
-            >
-              Mission & <span className="text-brand-accent">Vision</span>
+            <p className="text-brand-accent font-black tracking-widest uppercase text-sm mb-4">What Drives Us</p>
+            <h2 className="text-4xl sm:text-6xl font-black text-brand-navy">
+              Mission & <span className="text-brand-accent text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-amber-500">Vision</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
-            <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-xl border border-gray-50 border-t-8 border-t-brand-primary">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white font-bold text-2xl"
-                style={{ background: "linear-gradient(135deg, #1a5c96, #0d2b45)" }}
-              >
-                🎯
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
+            <div className="bg-white p-10 sm:p-14 rounded-[3rem] shadow-xl border border-gray-50 border-t-[12px] border-t-brand-primary">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-primary to-brand-navy flex items-center justify-center mb-10 shadow-lg shadow-brand-primary/20">
+                <Target size={40} className="text-white" />
               </div>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold brand-navy mb-6">Our Mission</h3>
-              <p className="text-gray-500 leading-relaxed text-base sm:text-lg italic">
+              <h3 className="text-3xl font-black text-brand-navy mb-6">Our Mission</h3>
+              <p className="text-gray-500 text-lg sm:text-xl leading-relaxed italic">
                 "To provide high-quality, safe, and engaging amusement equipment that inspires children and enhances recreational spaces — delivering maximum value to every client."
               </p>
             </div>
-            <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-xl border border-gray-50 border-t-8 border-t-brand-accent">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white font-bold text-2xl"
-                style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
-              >
-                🌏
+            <div className="bg-white p-10 sm:p-14 rounded-[3rem] shadow-xl border border-gray-50 border-t-[12px] border-t-brand-accent">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-accent to-amber-600 flex items-center justify-center mb-10 shadow-lg shadow-brand-accent/20">
+                <Globe size={40} className="text-white" />
               </div>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold brand-navy mb-6">Our Vision</h3>
-              <p className="text-gray-500 leading-relaxed text-base sm:text-lg italic">
+              <h3 className="text-3xl font-black text-brand-navy mb-6">Our Vision</h3>
+              <p className="text-gray-500 text-lg sm:text-xl leading-relaxed italic">
                 "To become a global leader in amusement ride manufacturing — known for innovation, enduring quality, and an unwavering commitment to child safety."
               </p>
             </div>
@@ -366,119 +166,39 @@ export default function About() {
       </section>
 
       {/* TRUSTED CLIENTS */}
-      <section className="py-16 font-body" style={{ background: "#eef4fb" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="section-label">Our Clientele</p>
-            <div className="gold-line mx-auto"></div>
-            <h2
-              className="font-display font-bold brand-navy"
-              style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)" }}
-            >
-              Trusted by Government, Resorts & Beyond
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-3 justify-center">
+      <section className="py-20 bg-brand-light/40">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-brand-accent font-black tracking-widest uppercase text-sm mb-4">Our Clientele</p>
+          <h2 className="text-3xl sm:text-4xl font-black text-brand-navy mb-12">Trusted by Government, Resorts & Beyond</h2>
+          <div className="flex flex-wrap gap-4 justify-center max-w-5xl mx-auto">
             {clients.map((c) => (
               <div
                 key={c.name}
-                className={`client-badge px-5 py-3 rounded-full text-sm font-semibold ${typeColors[c.type]}`}
+                className={`px-6 py-3 rounded-full text-sm font-bold shadow-sm transition-transform hover:scale-105 cursor-default ${typeColors[c.type]}`}
               >
-                {c.type === "Government" ? "🏛️" : c.type === "Resort" ? "🏨" : "🏘️"} {c.name}
+                {c.type === "Government" ? "🏛️" : c.type === "Resort" ? "🏨" : "🏘️"} <span className="ml-2">{c.name}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* LEADERSHIP SECTION */}
-      <section className="py-20 sm:py-32 font-body bg-brand-navy relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="zigzag-divider"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-16 sm:mb-24">
-            <p className="section-label" style={{ color: "#fcd34d" }}>Leadership</p>
-            <div className="gold-line mx-auto"></div>
-            <h2
-              className="font-display font-bold text-white"
-              style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
-            >
-              The Vision Behind <br className="sm:hidden" />
-              the <span className="text-brand-accent">Brand</span>
-            </h2>
-          </div>
-
-          <div className="max-w-5xl mx-auto bg-white rounded-[3rem] overflow-hidden shadow-3xl flex flex-col md:flex-row border border-white/10 group">
-            {/* Image Side */}
-            <div className="w-full md:w-2/5 bg-brand-navy p-10 sm:p-16 flex flex-col items-center justify-center text-center relative overflow-hidden">
-              <div className="absolute -top-24 -left-24 w-48 h-48 bg-brand-primary/40 rounded-full blur-3xl"></div>
-              
-              <div className="relative z-10">
-                <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white rounded-[2.5rem] mx-auto mb-8 shadow-2xl border-4 border-brand-accent/20 flex items-center justify-center p-2 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                  <div className="w-full h-full bg-brand-light rounded-[2rem] flex items-center justify-center">
-                    <span className="text-brand-primary font-display font-bold text-5xl">JB</span>
-                  </div>
-                </div>
-                <h3 className="font-display font-bold text-white text-3xl sm:text-4xl mb-2">Jeyamani Babu</h3>
-                <p className="text-brand-accent font-black tracking-[0.2em] uppercase text-xs mb-8">Proprietor</p>
-                <a
-                  href="https://bni-tirunelveli.in/tirunelveli-cmy-veli/en-IN/memberdetails?encryptedMemberId=KPZAM2s6IJl6HGNGEwH%2BgA%3D%3D&name=Babu+Jeyamani"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white text-white hover:text-brand-navy px-6 py-3 rounded-2xl text-xs font-black tracking-widest transition-all border border-white/20 uppercase"
-                >
-                  BNI Global Profile
-                </a>
-              </div>
-            </div>
-
-            {/* Content Side */}
-            <div className="w-full md:w-3/5 p-10 sm:p-20 flex flex-col justify-center bg-white">
-              <div className="text-brand-accent mb-10">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-              <p className="text-brand-navy text-xl sm:text-2xl leading-relaxed mb-10 font-medium italic font-display">
-                "Our goal has always been simple: to create environments where children can play safely and communities can thrive. At Indhu Amusement Ride Industries, we engineering joy, ensuring every product reflects our commitment to uncompromising quality."
-              </p>
-              <div className="border-t border-gray-100 pt-8 flex items-center gap-4">
-                <div className="h-0.5 w-12 bg-brand-accent"></div>
-                <div>
-                  <p className="font-black text-brand-navy uppercase tracking-widest text-sm text-[10px]">Indhu Industries</p>
-                  <p className="text-gray-400 text-xs mt-1">Tirunelveli, Tamil Nadu</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA BANNER */}
-      <section
-        className="py-20 font-body text-white"
-        style={{ background: "linear-gradient(135deg, #0d2b45 0%, #1a5c96 100%)" }}
-      >
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="section-label" style={{ color: "#fcd34d" }}>Ready to Build?</p>
-          <h2
-            className="font-display font-bold mb-6"
-            style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
-          >
-            Let's Create Spaces That Inspire Joy
+      <section className="py-24 sm:py-32 bg-brand-navy text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+          <h2 className="text-4xl sm:text-6xl font-black mb-8 leading-tight tracking-tight">
+            Let's Create Spaces <br />
+            That <span className="text-brand-accent">Inspire Joy</span>
           </h2>
-          <p className="opacity-80 mb-8 leading-relaxed max-w-xl mx-auto">
-            Whether it's a government park, luxury resort, or residential community — our team is
-            ready to deliver world-class amusement solutions tailored to your vision.
+          <p className="text-white/70 text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
+            Whether it's a government park, luxury resort, or residential community — our team is ready to deliver world-class amusement solutions.
           </p>
           <a
             href="/contact"
-            className="inline-block font-semibold px-10 py-4 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-            style={{ background: "#f59e0b", color: "#0d2b45", fontSize: "1rem" }}
+            className="inline-flex items-center gap-3 bg-brand-accent text-brand-navy px-12 py-5 rounded-2xl font-black text-lg hover:shadow-[0_0_40px_rgba(198,211,0,0.4)] transition-all transform hover:-translate-y-1 active:scale-95"
           >
-            Get in Touch →
+            Get in Touch <ChevronRight size={24} />
           </a>
         </div>
       </section>

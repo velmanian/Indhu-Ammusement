@@ -91,8 +91,8 @@ export default function HomeClient() {
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center mb-8 sm:mb-12"
           >
-            <div className="origin-center rounded-xl overflow-hidden scale-110 sm:scale-150 md:scale-200 lg:scale-250">
-              <Logo size="default" />
+            <div className="bg-white px-8 py-4 rounded-[2rem] sm:rounded-full shadow-2xl border-4 border-white/20 backdrop-blur-sm transform hover:scale-105 transition-transform duration-500">
+              <Logo size="large" />
             </div>
           </motion.div>
           <motion.h1
@@ -207,6 +207,7 @@ export default function HomeClient() {
             </motion.div>
           </div>
 
+          {/* Mobile category tabs */}
           <div className="lg:hidden flex overflow-x-auto pb-6 -mx-6 px-6 gap-3 no-scrollbar scroll-smooth snap-x">
             {expertiseCategories.map((category) => (
               <button
@@ -224,9 +225,10 @@ export default function HomeClient() {
           </div>
 
           <div
-            className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-[500px] lg:min-h-[600px]"
+            className="flex flex-col lg:flex-row gap-8 lg:gap-12"
             onMouseLeave={() => window.innerWidth > 1024 && setActiveExpertise(expertiseCategories[0].id)}
           >
+            {/* Left: category list (desktop only) */}
             <div className="hidden lg:flex w-5/12 flex-col justify-center gap-4">
               {expertiseCategories.map((category, index) => {
                 const Icon = category.icon;
@@ -278,45 +280,62 @@ export default function HomeClient() {
               })}
             </div>
 
-            <div className="w-full lg:w-7/12 relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-white border-4 border-white/50 min-h-[350px] sm:min-h-[450px]">
-              <div className={`absolute inset-0 bg-gradient-to-br ${activeCategory.color} opacity-10 transition-colors duration-700 z-0`}></div>
+            {/* Right: vertical card — image top, content bottom */}
+            <div className="w-full lg:w-7/12 relative rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-white border border-gray-100 flex flex-col">
+              <div className={`absolute inset-0 bg-gradient-to-br ${activeCategory.color} opacity-10 z-0`}></div>
 
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCategory.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 z-10 p-6 sm:p-12 flex flex-col sm:flex-row items-center gap-8"
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.4, ease: "circOut" }}
+                  className="relative z-10 w-full flex flex-col flex-1"
                 >
-                  <div className="w-full sm:w-1/2 h-48 sm:h-full relative flex items-center justify-center">
+                  {/* Image — full width, fixed height, no padding, no gaps */}
+                  <div className="w-full h-full object-cover object-top">
                     <img
                       src={activeCategory.image}
                       alt={activeCategory.title}
-                      className="max-w-full max-h-full object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = activeCategory.fallback;
-                        target.className = "w-full h-full object-cover opacity-80 mix-blend-multiply";
+                        target.className = "w-full h-full object-contain opacity-20 p-12";
                       }}
                     />
                   </div>
-                  <div className="w-full sm:w-1/2 flex flex-col justify-center text-center sm:text-left">
-                    <h3 className="text-2xl sm:text-3xl font-black text-brand-navy mb-4 lg:hidden">
-                      {activeCategory.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm sm:text-base lg:text-lg leading-relaxed mb-6">
-                      {activeCategory.description}
-                    </p>
-                    <Link href="/products" className="inline-flex items-center justify-center sm:justify-start gap-2 bg-brand-navy text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-primary transition-all">
-                      View Catalog <ArrowRight size={18} />
-                    </Link>
-                  </div>
+
+                  {/* Content — sits flush below the image */}
+                 <div className="p-8 sm:p-10 flex flex-col items-center text-center justify-center">
+  <div className="flex items-center gap-3 mb-4">
+    <span className="bg-brand-primary/10 text-brand-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+      Indhu Quality
+    </span>
+  </div>
+
+  <h3 className="text-2xl sm:text-3xl font-black text-brand-navy mb-3">
+    {activeCategory.title}
+  </h3>
+
+  <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-8 font-medium">
+    {activeCategory.description}
+  </p>
+
+  <Link
+    href="/products"
+    className="inline-flex items-center gap-3 bg-brand-navy text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-xl transition-all active:scale-95 group w-fit"
+  >
+    Browse {activeCategory.title}
+    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+  </Link>
+</div>
                 </motion.div>
               </AnimatePresence>
 
-              <div className="absolute top-6 right-6 z-20 hidden sm:block">
+              {/* Featured pill — top right over image */}
+              <div className="absolute top-6 right-6 z-20">
                 <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></div>
                   <span className="font-bold text-brand-navy tracking-wide text-xs uppercase">Featured</span>

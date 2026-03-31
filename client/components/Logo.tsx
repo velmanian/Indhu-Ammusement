@@ -1,18 +1,21 @@
-export default function Logo({ size = 'default' }: { size?: 'small' | 'default' | 'large' }) {
+export default function Logo({ size = 'default', className = "" }: { size?: 'small' | 'default' | 'large' | 'xlarge', className?: string }) {
   const sizes = {
     small: { maxWidth: '100px', maxHeight: '60px' },
     default: { maxWidth: '120px', maxHeight: '60px' },
-    large: { maxWidth: '450px', maxHeight: '225px' }
+    large: { maxWidth: '300px', maxHeight: '150px' },
+    xlarge: { maxWidth: '500px', maxHeight: '250px' }
   };
 
-  const { maxWidth, maxHeight } = sizes[size];
+  const { maxWidth, maxHeight } = sizes[size] || sizes.default;
 
   return (
-    <img 
-      src="/logocrop.png"
-      alt="INDHU Amusement Ride Industries Logo" 
-      style={{ maxWidth, maxHeight, width: '100%', height: 'auto' }}
-      className="object-contain"
-    />
+    <div className={`flex items-center justify-center ${className}`}>
+      <img 
+        src="/logocrop.png"
+        alt="INDHU Amusement Ride Industries Logo" 
+        style={{ maxWidth, maxHeight, width: '100%', height: 'auto' }}
+        className="object-contain"
+      />
+    </div>
   );
 }
