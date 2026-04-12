@@ -73,6 +73,14 @@ export const updateFallbackProduct = (id: string, productData: any) => {
         data.products[index] = { ...data.products[index], ...productData };
         saveFallbackData(data);
         return data.products[index];
+    } else {
+        // If it was originally in Mongo but Mongo dropped, and not in fallback yet, push it!
+        if (productData.name && productData.slug) {
+            const newProd = { _id: id, id: id, ...productData };
+            data.products.push(newProd);
+            saveFallbackData(data);
+            return newProd;
+        }
     }
     return null;
 };

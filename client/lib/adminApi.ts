@@ -22,7 +22,7 @@ export const createProduct = async (data: any) => {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to create product');
+    throw new Error(errorData.error || errorData.message || 'Failed to create product');
   }
   return res.json();
 };
@@ -35,7 +35,7 @@ export const updateProduct = async (id: string, data: any) => {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to update product');
+    throw new Error(errorData.error || errorData.message || 'Failed to update product');
   }
   return res.json();
 };
@@ -48,7 +48,7 @@ export const deleteProduct = async (id: string) => {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to delete product');
+    throw new Error(errorData.error || errorData.message || 'Failed to delete product');
   }
   return res.json();
 };
@@ -75,7 +75,7 @@ export const updateEnquiryStatus = async (enquiryId: any, data: any) => {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to update enquiry status');
+    throw new Error(errorData.error || errorData.message || 'Failed to update enquiry status');
   }
   return res.json();
 };
@@ -87,7 +87,7 @@ export const deleteEnquiry = async (enquiryId: any) => {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to delete enquiry');
+    throw new Error(errorData.error || errorData.message || 'Failed to delete enquiry');
   }
   return res.json();
 };
