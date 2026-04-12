@@ -157,19 +157,12 @@ export default function QuickViewModal({ slug, isOpen, onClose }: QuickViewModal
                         </div>
                       </div>
 
-                      <div className="mt-auto pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
-                        <Link 
-                           href={`/products/${product.slug}`}
-                           onClick={onClose}
-                           className="flex-1 text-brand-navy font-bold text-sm py-4 rounded-xl border-2 border-gray-200 hover:border-brand-navy hover:bg-brand-navy hover:text-white transition-all text-center uppercase tracking-widest"
-                        >
-                          View Full Page
-                        </Link>
+                      <div className="mt-auto pt-8 border-t border-gray-100">
                         <Link
                            href={`/enquiry?productId=${product._id || product.id}`}
-                           className="flex-1 bg-brand-primary hover:bg-brand-secondary text-white font-bold text-sm py-4 rounded-xl shadow-lg shadow-brand-primary/30 transition-all flex items-center justify-center gap-2 uppercase tracking-widest group"
+                           className="w-full bg-brand-primary hover:bg-brand-secondary text-white font-black text-sm sm:text-base py-4 rounded-xl shadow-lg shadow-brand-primary/30 transition-all flex items-center justify-center gap-2 uppercase tracking-widest group"
                         >
-                          Enquire Now <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                          Enquire Now <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </div>
 
