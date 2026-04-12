@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import ProductDetailClient from '@/components/ProductDetailClient';
 import { fetchPublic } from '@/lib/api';
+import { FALLBACK_PRODUCTS } from '@/lib/fallbackData';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -10,7 +11,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   
   try {
-    const product = await fetchPublic(`/products/${slug}`);
+    let product: any = null;
+    try {
+      product = await fetchPublic(`/products/${slug}`);
+    } catch (apiError) {
+      console.warn(`[Metadata] Backend offline or error fetching product ${slug}, using fallback.`);
+      product = FALLBACK_PRODUCTS.find(p => p.slug === slug);
+    }
     
     if (!product) {
       return {
@@ -56,7 +63,13 @@ export default async function ProductDetail({ params }: PageProps) {
   let jsonLd = null;
 
   try {
-    product = await fetchPublic(`/products/${slug}`);
+    try {
+      product = await fetchPublic(`/products/${slug}`);
+    } catch (apiError) {
+      console.warn(`[Page] Backend offline or error fetching product ${slug}, using fallback.`);
+      product = FALLBACK_PRODUCTS.find(p => p.slug === slug);
+    }
+
     if (product) {
       jsonLd = {
         '@context': 'https://schema.org',

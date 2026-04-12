@@ -17,7 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Products() {
-  return <ProductsClient />;
-}
+import { Suspense } from 'react';
 
+export default function Products() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-brand-light">Loading...</div>}>
+      <ProductsClient />
+    </Suspense>
+  );
+}
