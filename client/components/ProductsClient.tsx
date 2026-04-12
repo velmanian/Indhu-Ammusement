@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Search, Filter, Loader2, ArrowRight } from 'lucide-react';
 import { fetchPublic } from '@/lib/api';
 import { FALLBACK_CATEGORIES, FALLBACK_PRODUCTS } from '@/lib/fallbackData';
+import QuickViewModal from '@/components/QuickViewModal';
 
 interface Product {
   _id?: string;
@@ -39,6 +40,7 @@ export default function ProductsClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [quickViewSlug, setQuickViewSlug] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
 
@@ -187,7 +189,7 @@ export default function ProductsClient() {
                   </div>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                     {category.products.map(product => (
-                      <ProductCard key={getProductId(product)} product={product} categoryName={category.name} />
+                      <ProductCard key={getProductId(product)} product={product} categoryName={category.name} onQuickView={setQuickViewSlug} />
                     ))}
                   </div>
                 </div>
@@ -202,6 +204,7 @@ export default function ProductsClient() {
                   key={getProductId(product)}
                   product={product}
                   categoryName={product.category?.name || 'Other'}
+                  onQuickView={setQuickViewSlug}
                 />
               ))}
             </div>
@@ -213,15 +216,21 @@ export default function ProductsClient() {
           </>
         )}
       </div>
+      
+      <QuickViewModal 
+        slug={quickViewSlug} 
+        isOpen={!!quickViewSlug} 
+        onClose={() => setQuickViewSlug(null)} 
+      />
     </div>
   );
 }
 
-function ProductCard({ product, categoryName }: { product: Product; categoryName: string }) {
+function ProductCard({ product, categoryName, onQuickView }: { product: Product; categoryName: string; onQuickView: (slug: string) => void }) {
   const productId = String(product._id || product.id || product.slug);
   return (
     <div className="bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group border border-gray-100 flex flex-col h-full">
-      <Link href={`/products/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden border-b border-gray-50 cursor-pointer">
+      <button onClick={() => onQuickView(product.slug)} className="block w-full text-left relative aspect-square bg-gray-50 overflow-hidden border-b border-gray-50 cursor-pointer">
         <img
           src={product.images?.[0] || '/placeholder-image.png'}
           alt={product.name}
@@ -233,13 +242,13 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
         <span className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-brand-primary/90 backdrop-blur-sm text-white text-[8px] sm:text-[10px] font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg uppercase tracking-widest">
           {categoryName}
         </span>
-      </Link>
+      </button>
       <div className="p-4 sm:p-6 flex flex-col flex-grow">
-        <Link href={`/products/${product.slug}`} className="block group-hover:text-brand-primary transition">
+        <button onClick={() => onQuickView(product.slug)} className="block w-full text-left group-hover:text-brand-primary transition">
           <h3 className="text-sm sm:text-xl font-black text-brand-navy group-hover:text-brand-primary transition leading-tight line-clamp-2 min-h-[2.5em] mb-2 sm:mb-3">
             {product.name}
           </h3>
-        </Link>
+        </button>
         <div className="flex flex-wrap gap-1.5 mb-4 mt-auto">
           {product.specifications?.material && (
             <span className="text-[8px] sm:text-[10px] bg-brand-light text-brand-primary px-2 py-0.5 rounded-md font-bold uppercase">
@@ -253,12 +262,12 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
           )}
         </div>
         <div className="pt-3 border-t border-gray-50 mt-auto flex flex-col sm:flex-row gap-2">
-          <Link
-            href={`/products/${product.slug}`}
+          <button
+            onClick={() => onQuickView(product.slug)}
             className="flex-1 bg-white border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white py-2.5 sm:py-3 rounded-xl font-black text-[10px] sm:text-sm tracking-widest uppercase transition-all flex items-center justify-center text-center"
           >
             Details
-          </Link>
+          </button>
           <button
             onClick={() => {
               const url = new URL(window.location.origin + '/enquiry');

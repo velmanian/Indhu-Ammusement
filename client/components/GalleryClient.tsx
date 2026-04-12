@@ -5,6 +5,7 @@ import { Loader2, Search, Filter, Camera } from 'lucide-react';
 import { fetchPublic } from '@/lib/api';
 import { Product, Category } from '@/types';
 import { FALLBACK_CATEGORIES, FALLBACK_PRODUCTS } from '@/lib/fallbackData';
+import QuickViewModal from '@/components/QuickViewModal';
 
 export default function GalleryClient() {
     const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS as Product[]);
@@ -13,6 +14,7 @@ export default function GalleryClient() {
     const [error, setError] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [quickViewSlug, setQuickViewSlug] = useState<string | null>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -146,9 +148,9 @@ export default function GalleryClient() {
                                         (e.target as HTMLImageElement).src = '/placeholder-image.png';
                                     }}
                                 />
-                                <a href={`/products/${img.productSlug}`} className="absolute inset-0 z-10 block sm:hidden">
+                                <button onClick={() => setQuickViewSlug(img.productSlug)} className="absolute inset-0 z-10 block sm:hidden cursor-pointer w-full text-left">
                                     <span className="sr-only">View {img.productName}</span>
-                                </a>
+                                </button>
                                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/90 via-brand-navy/40 to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end p-4 sm:p-8 pointer-events-none sm:pointer-events-auto">
                                     <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                                         <span className="text-brand-accent text-[10px] sm:text-xs font-black uppercase tracking-widest mb-1 sm:mb-2 block">
@@ -158,12 +160,12 @@ export default function GalleryClient() {
                                             {img.productName}
                                         </h3>
                                         <div className="flex flex-wrap gap-2 pointer-events-auto">
-                                            <a
-                                                href={`/products/${img.productSlug}`}
+                                            <button
+                                                onClick={() => setQuickViewSlug(img.productSlug)}
                                                 className="inline-flex items-center gap-2 bg-brand-primary text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-secondary transition-colors"
                                             >
                                                 View Details
-                                            </a>
+                                            </button>
                                             <a
                                                 href={`/enquiry?productId=${img.productId}`}
                                                 className="inline-flex items-center gap-2 bg-white text-brand-navy px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-accent transition-colors"
@@ -203,6 +205,12 @@ export default function GalleryClient() {
                     </div>
                 </div>
             </div>
+            
+            <QuickViewModal 
+                slug={quickViewSlug} 
+                isOpen={!!quickViewSlug} 
+                onClose={() => setQuickViewSlug(null)} 
+            />
         </div>
     );
 }
