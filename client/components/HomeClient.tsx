@@ -15,6 +15,7 @@ const expertiseCategories = [
     fallback: "/placeholder-slide.jpg",
     icon: Play,
     color: "from-blue-500/20 to-brand-primary/80",
+    slug: "frp-slides",
     size: "large"
   },
   {
@@ -25,6 +26,7 @@ const expertiseCategories = [
     fallback: "/placeholder-swing.jpg",
     icon: Activity,
     color: "from-orange-500/20 to-brand-accent/80",
+    slug: "swings-climbers",
     size: "normal"
   },
   {
@@ -35,6 +37,7 @@ const expertiseCategories = [
     fallback: "/placeholder-gym.jpg",
     icon: Maximize,
     color: "from-emerald-500/20 to-emerald-700/80",
+    slug: "outdoor-gym",
     size: "normal"
   },
   {
@@ -45,6 +48,7 @@ const expertiseCategories = [
     fallback: "/placeholder-seesaw.jpg",
     icon: Navigation,
     color: "from-purple-500/20 to-purple-700/80",
+    slug: "swings-climbers",
     size: "wide"
   },
   {
@@ -55,6 +59,7 @@ const expertiseCategories = [
     fallback: "/placeholder-rider.jpg",
     icon: TreePine,
     color: "from-stone-500/20 to-stone-700/80",
+    slug: "swings-climbers",
     size: "normal"
   },
   {
@@ -65,6 +70,7 @@ const expertiseCategories = [
     fallback: "/placeholder-multiplay.jpg",
     icon: PaintBucket,
     color: "from-cyan-500/20 to-cyan-700/80",
+    slug: "frp-slides",
     size: "normal"
   }
 ];
@@ -226,7 +232,6 @@ export default function HomeClient() {
 
           <div
             className="flex flex-col lg:flex-row gap-8 lg:gap-12"
-            onMouseLeave={() => window.innerWidth > 1024 && setActiveExpertise(expertiseCategories[0].id)}
           >
             {/* Left: category list (desktop only) */}
             <div className="hidden lg:flex w-5/12 flex-col justify-center gap-4">
@@ -324,7 +329,7 @@ export default function HomeClient() {
   </p>
 
   <Link
-    href="/products"
+    href={`/products?category=${activeCategory.slug}`}
     className="inline-flex items-center gap-3 bg-brand-navy text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-xl transition-all active:scale-95 group w-fit"
   >
     Browse {activeCategory.title}

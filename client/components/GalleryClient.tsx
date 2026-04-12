@@ -43,7 +43,8 @@ export default function GalleryClient() {
             productName: product.name,
             categorySlug: product.category?.slug || 'other',
             categoryName: product.category?.name || 'Other',
-            productId: product.id
+            productId: product.id,
+            productSlug: product.slug
         }))
     );
 
@@ -145,7 +146,10 @@ export default function GalleryClient() {
                                         (e.target as HTMLImageElement).src = '/placeholder-image.png';
                                     }}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/90 via-brand-navy/40 to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end p-4 sm:p-8">
+                                <a href={`/products/${img.productSlug}`} className="absolute inset-0 z-10 block sm:hidden">
+                                    <span className="sr-only">View {img.productName}</span>
+                                </a>
+                                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/90 via-brand-navy/40 to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end p-4 sm:p-8 pointer-events-none sm:pointer-events-auto">
                                     <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                                         <span className="text-brand-accent text-[10px] sm:text-xs font-black uppercase tracking-widest mb-1 sm:mb-2 block">
                                             {img.categoryName}
@@ -153,12 +157,20 @@ export default function GalleryClient() {
                                         <h3 className="text-white text-base sm:text-2xl font-black leading-tight mb-2 sm:mb-4 line-clamp-2">
                                             {img.productName}
                                         </h3>
-                                        <a
-                                            href={`/enquiry?productId=${img.productId}`}
-                                            className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-accent transition-colors"
-                                        >
-                                            Enquire Now
-                                        </a>
+                                        <div className="flex flex-wrap gap-2 pointer-events-auto">
+                                            <a
+                                                href={`/products/${img.productSlug}`}
+                                                className="inline-flex items-center gap-2 bg-brand-primary text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-secondary transition-colors"
+                                            >
+                                                View Details
+                                            </a>
+                                            <a
+                                                href={`/enquiry?productId=${img.productId}`}
+                                                className="inline-flex items-center gap-2 bg-white text-brand-navy px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm hover:bg-brand-accent transition-colors"
+                                            >
+                                                Enquire
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent sm:hidden z-15">

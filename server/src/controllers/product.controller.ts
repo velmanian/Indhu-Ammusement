@@ -1,9 +1,74 @@
 import { Request, Response } from 'express';
 import { ProductModel } from '../models/Product';
 import { CategoryModel } from '../models/Category';
-import { getFallbackData, addFallbackProduct, updateFallbackProduct, deleteFallbackProduct } from '../lib/fallbackDb';
+import { getFallbackData, addFallbackProduct, updateFallbackProduct, deleteFallbackProduct, addFallbackCategory } from '../lib/fallbackDb';
 
 import { getIsConnected } from '../lib/database';
+
+/**
+ * Resolves a category by ID or Name (creating it if necessary)
+ * Similar to bulk upload logic
+ */
+const resolveCategory = async (categoryId?: string, categoryName?: string) => {
+    let resolvedId: any = categoryId;
+    let categoryInfo: any = null;
+
+    if (getIsConnected()) {
+        try {
+            if (categoryName) {
+                let dbCategory = await CategoryModel.findOne({
+                    $or: [
+                        { name: categoryName },
+                        { slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-') }
+                    ]
+                });
+
+                if (!dbCategory) {
+                    dbCategory = await CategoryModel.create({
+                        name: categoryName,
+                        slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                    });
+                }
+                resolvedId = dbCategory._id;
+                categoryInfo = { _id: dbCategory._id, id: dbCategory._id, name: dbCategory.name, slug: dbCategory.slug };
+            } else if (categoryId && !categoryId.startsWith('offline_')) {
+                const dbCategory = await CategoryModel.findById(categoryId);
+                if (dbCategory) {
+                    categoryInfo = { _id: dbCategory._id, id: dbCategory._id, name: dbCategory.name, slug: dbCategory.slug };
+                }
+            }
+        } catch (err) {
+            console.error('Error resolving category in DB:', err);
+        }
+    }
+
+    // Fallback/Offline resolution
+    if (!categoryInfo) {
+        const fallback = getFallbackData();
+        if (categoryName) {
+            let fCat = fallback.categories.find(c => 
+                c.name.toLowerCase() === categoryName.toLowerCase() || 
+                c.slug === categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+            );
+
+            if (!fCat) {
+                fCat = {
+                    _id: 'offline_cat_' + Date.now(),
+                    id: 'offline_cat_' + Date.now(),
+                    name: categoryName,
+                    slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                };
+                addFallbackCategory(fCat);
+            }
+            resolvedId = fCat._id;
+            categoryInfo = fCat;
+        } else if (categoryId) {
+            categoryInfo = fallback.categories.find(c => c._id === categoryId || c.id === categoryId);
+        }
+    }
+
+    return { categoryId: resolvedId, categoryInfo };
+};
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
@@ -80,12 +145,23 @@ const returnFallbackProductBySlug = (res: Response, slug: string) => {
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, slug, description, specifications, images, categoryId } = req.body;
-    const product = new ProductModel({ name, slug, description, specifications, images, categoryId });
+    const { name, slug, description, specifications, images, categoryId, categoryName } = req.body;
+    
+    // 1. Resolve Category
+    const { categoryId: resolvedCategoryId, categoryInfo } = await resolveCategory(categoryId, categoryName);
+    
+    const product = new ProductModel({ 
+        name, 
+        slug, 
+        description, 
+        specifications, 
+        images, 
+        categoryId: resolvedCategoryId 
+    });
 
     if (!getIsConnected()) {
       console.warn('Database is offline (cached state), persisting product to local fallback');
-      return persistToFallback(req, res, product, categoryId);
+      return persistToFallback(req, res, product, resolvedCategoryId, categoryInfo);
     }
 
     try {
@@ -100,15 +176,18 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-const persistToFallback = (req: Request, res: Response, product: any, categoryId: string) => {
+const persistToFallback = (req: Request, res: Response, product: any, categoryId: string, categoryInfo?: any) => {
   // Assign a fake ID so the frontend doesn't crash
   const fakeId = 'offline_' + Date.now();
   (product as any)._id = fakeId;
   (product as any).id = fakeId;
 
-  // Try to find category info for the fallback
-  const fallback = getFallbackData();
-  const category = fallback.categories.find(c => c._id === categoryId || c.id === categoryId);
+  // Use provided categoryInfo or look it up
+  let category = categoryInfo;
+  if (!category) {
+    const fallback = getFallbackData();
+    category = fallback.categories.find(c => c._id === categoryId || c.id === categoryId);
+  }
 
   addFallbackProduct({
     ...req.body,
@@ -122,7 +201,14 @@ const persistToFallback = (req: Request, res: Response, product: any, categoryId
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const data = req.body;
+    const { categoryName, ...restOfData } = req.body;
+    let data = { ...restOfData };
+
+    // 1. Handle Dynamic Category Creation for Update
+    if (categoryName) {
+        const { categoryId: resolvedCategoryId } = await resolveCategory(undefined, categoryName);
+        data.categoryId = resolvedCategoryId;
+    }
 
     // Handle offline IDs or database disconnection
     if (id.startsWith('offline_') || !getIsConnected()) {

@@ -36,6 +36,9 @@ export default function ProductModal({
     images: [] as string[],
   });
 
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -87,6 +90,8 @@ export default function ProductModal({
       }
       setNewImageFiles([]);
       setError('');
+      setShowNewCategory(false);
+      setNewCategoryName('');
     }
   }, [isOpen, editingProduct]);
 
@@ -139,7 +144,8 @@ export default function ProductModal({
 
       const productData = {
         ...formData,
-        categoryId: formData.categoryId || undefined,
+        categoryId: showNewCategory ? undefined : (formData.categoryId || undefined),
+        categoryName: showNewCategory ? newCategoryName : undefined,
         specifications: {
           ...(formData.specifications ? (() => {
             try { return JSON.parse(formData.specifications); }
@@ -233,8 +239,16 @@ export default function ProductModal({
                   Category
                 </label>
                 <select
-                  value={formData.categoryId}
-                  onChange={e => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
+                  value={showNewCategory ? 'NEW' : formData.categoryId}
+                  onChange={e => {
+                    if (e.target.value === 'NEW') {
+                        setShowNewCategory(true);
+                        setFormData(prev => ({ ...prev, categoryId: '' }));
+                    } else {
+                        setShowNewCategory(false);
+                        setFormData(prev => ({ ...prev, categoryId: e.target.value }));
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition bg-white"
                 >
                   <option value="">— Select a category —</option>
@@ -243,8 +257,27 @@ export default function ProductModal({
                       {cat.name}
                     </option>
                   ))}
+                  <option value="NEW" className="text-blue-900 font-bold">+ Create New Category...</option>
                 </select>
               </div>
+
+              {/* Dynamic New Category Input */}
+              {showNewCategory && (
+                <div className="md:col-span-2 bg-blue-50 p-4 rounded-2xl border border-blue-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="block text-sm font-semibold text-blue-900 mb-2">
+                    New Category Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={showNewCategory}
+                    value={newCategoryName}
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-900 outline-none transition"
+                    placeholder="e.g. Adventure Zone"
+                    autoFocus
+                  />
+                </div>
+              )}
 
               {/* Description */}
               <div className="md:col-span-2">

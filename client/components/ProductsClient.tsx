@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Filter, Loader2, ArrowRight } from 'lucide-react';
 import { fetchPublic } from '@/lib/api';
@@ -39,6 +40,8 @@ export default function ProductsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -58,16 +61,28 @@ export default function ProductsClient() {
         } else {
           setCategories(FALLBACK_CATEGORIES);
         }
+
+        // Handle initial category filter from URL
+        const categoryParam = searchParams.get('category');
+        if (categoryParam) {
+          setSelectedCategory(categoryParam);
+        }
       } catch (err) {
         console.error('Error loading products, using fallback:', err);
         setProducts(FALLBACK_PRODUCTS as Product[]);
         setCategories(FALLBACK_CATEGORIES);
+        
+        // Handle initial category filter from URL even in fallback
+        const categoryParam = searchParams.get('category');
+        if (categoryParam) {
+          setSelectedCategory(categoryParam);
+        }
       } finally {
         setLoading(false);
       }
     };
     loadData();
-  }, []);
+  }, [searchParams]);
 
   const getCategorySlug = (product: Product): string => {
     return product.category?.slug || 'other';
@@ -206,7 +221,7 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
   const productId = String(product._id || product.id || product.slug);
   return (
     <div className="bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group border border-gray-100 flex flex-col h-full">
-      <div className="aspect-square bg-gray-50 overflow-hidden relative border-b border-gray-50">
+      <Link href={`/products/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden border-b border-gray-50 cursor-pointer">
         <img
           src={product.images?.[0] || '/placeholder-image.png'}
           alt={product.name}
@@ -218,11 +233,13 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
         <span className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-brand-primary/90 backdrop-blur-sm text-white text-[8px] sm:text-[10px] font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg uppercase tracking-widest">
           {categoryName}
         </span>
-      </div>
+      </Link>
       <div className="p-4 sm:p-6 flex flex-col flex-grow">
-        <h3 className="text-sm sm:text-xl font-black text-brand-navy group-hover:text-brand-primary transition leading-tight line-clamp-2 min-h-[2.5em] mb-2 sm:mb-3">
-          {product.name}
-        </h3>
+        <Link href={`/products/${product.slug}`} className="block group-hover:text-brand-primary transition">
+          <h3 className="text-sm sm:text-xl font-black text-brand-navy group-hover:text-brand-primary transition leading-tight line-clamp-2 min-h-[2.5em] mb-2 sm:mb-3">
+            {product.name}
+          </h3>
+        </Link>
         <div className="flex flex-wrap gap-1.5 mb-4 mt-auto">
           {product.specifications?.material && (
             <span className="text-[8px] sm:text-[10px] bg-brand-light text-brand-primary px-2 py-0.5 rounded-md font-bold uppercase">
@@ -235,14 +252,20 @@ function ProductCard({ product, categoryName }: { product: Product; categoryName
             </span>
           )}
         </div>
-        <div className="pt-3 border-t border-gray-50 mt-auto">
+        <div className="pt-3 border-t border-gray-50 mt-auto flex flex-col sm:flex-row gap-2">
+          <Link
+            href={`/products/${product.slug}`}
+            className="flex-1 bg-white border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white py-2.5 sm:py-3 rounded-xl font-black text-[10px] sm:text-sm tracking-widest uppercase transition-all flex items-center justify-center text-center"
+          >
+            Details
+          </Link>
           <button
             onClick={() => {
               const url = new URL(window.location.origin + '/enquiry');
               url.searchParams.set('productId', productId);
               window.location.href = url.toString();
             }}
-            className="w-full bg-brand-navy hover:bg-brand-primary text-white py-3 rounded-xl font-black text-[10px] sm:text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 group/btn"
+            className="flex-1 bg-brand-navy hover:bg-brand-primary text-white py-2.5 sm:py-3 rounded-xl font-black text-[10px] sm:text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 group/btn"
           >
             Enquire <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
           </button>
