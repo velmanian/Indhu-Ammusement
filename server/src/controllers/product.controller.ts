@@ -47,7 +47,7 @@ const returnFallbackProducts = (req: Request, res: Response, category?: string) 
 
 export const getProductBySlug = async (req: Request, res: Response) => {
   try {
-    const { slug } = req.params;
+    const slug = req.params.slug as string;
 
     if (!getIsConnected()) {
       console.warn('Database is offline (cached state), searching fallback for slug:', slug);
@@ -121,7 +121,7 @@ const persistToFallback = (req: Request, res: Response, product: any, categoryId
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const data = req.body;
 
     // Handle offline IDs or database disconnection
@@ -166,7 +166,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     if (id.startsWith('offline_') || !getIsConnected()) {
       console.warn('Deleting product from local fallback (ID or Offline):', id);

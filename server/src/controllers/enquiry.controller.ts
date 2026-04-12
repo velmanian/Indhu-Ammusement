@@ -105,7 +105,7 @@ export const submitEnquiry = async (req: Request, res: Response) => {
 
 export const updateEnquiryStatus = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status } = req.body;
 
     // Validate status

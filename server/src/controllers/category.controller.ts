@@ -57,7 +57,7 @@ const persistCategoryToFallback = (res: Response, category: any, data: any) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const data = req.body;
 
     if (id.startsWith('offline_cat_') || !getIsConnected()) {
@@ -84,7 +84,7 @@ export const updateCategory = async (req: Request, res: Response) => {
 
 export const deleteCategory = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
   
       if (id.startsWith('offline_cat_') || !getIsConnected()) {
         const success = deleteFallbackCategory(id);

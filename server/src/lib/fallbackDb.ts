@@ -22,6 +22,10 @@ export const getFallbackData = (): FallbackData => {
 
 export const saveFallbackData = (data: FallbackData) => {
     try {
+        const dir = path.dirname(FALLBACK_FILE);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         fs.writeFileSync(FALLBACK_FILE, JSON.stringify(data, null, 2));
     } catch (error) {
         console.error('Error writing fallback file:', error);
