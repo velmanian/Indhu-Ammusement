@@ -131,8 +131,9 @@ export const updateEnquiryStatus = async (req: Request, res: Response) => {
     }
 
     res.json(enquiry);
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating enquiry status', error });
+  } catch (error: any) {
+    console.error('Error in updateEnquiryStatus:', error);
+    res.status(500).json({ message: 'Error updating enquiry status', error: error.message || error });
   }
 };
 
@@ -150,8 +151,9 @@ export const getEnquiries = async (req: Request, res: Response) => {
       .select('-__v') // Exclude version key
       .sort({ createdAt: -1 });
     res.json(enquiries);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching enquiries', error });
+  } catch (error: any) {
+    console.error('Error in getEnquiries:', error);
+    res.status(500).json({ message: 'Error fetching enquiries', error: error.message || error });
   }
 };
 
@@ -174,8 +176,9 @@ export const getEnquiryById = async (req: Request, res: Response) => {
     }
 
     res.json(enquiry);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching enquiry', error });
+  } catch (error: any) {
+    console.error('Error in getEnquiryById:', error);
+    res.status(500).json({ message: 'Error fetching enquiry', error: error.message || error });
   }
 };
 export const deleteEnquiry = async (req: Request, res: Response) => {
@@ -188,7 +191,8 @@ export const deleteEnquiry = async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, message: 'Enquiry deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting enquiry', error });
+  } catch (error: any) {
+    console.error('Error in deleteEnquiry:', error);
+    res.status(500).json({ message: 'Error deleting enquiry', error: error.message || error });
   }
 };

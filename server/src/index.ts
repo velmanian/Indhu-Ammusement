@@ -99,14 +99,9 @@ const startServer = () => {
 // Start listening immediately
 startServer();
 
-// Then try to connect to DB in the background
+// Connect to MongoDB in the background
 connectDB().then(async () => {
-  console.log('✅ MongoDB connection check complete');
-  await ensureDefaultAdmin();
   if (getIsConnected()) {
-    console.log('📡 Database is LIVE');
+    await ensureDefaultAdmin();
   }
-}).catch((error) => {
-  console.error('❌ Database connection failed:', error.message);
-  console.warn('⚠️ Server is running in OFFLINE MODE');
 });

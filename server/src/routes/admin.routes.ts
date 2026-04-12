@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { createProduct, updateProduct, deleteProduct, getProducts as adminGetProducts } from '../controllers/product.controller';
-import { createCategory, getCategories } from '../controllers/category.controller';
+import { createCategory, getCategories, updateCategory, deleteCategory } from '../controllers/category.controller';
 import { getEnquiries, updateEnquiryStatus, getEnquiryById, deleteEnquiry } from '../controllers/enquiry.controller';
 import { bulkUploadProducts, bulkUploadImages } from '../controllers/bulk.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
@@ -45,6 +45,8 @@ router.delete('/products/:id', deleteProduct);
 
 router.get('/categories', getCategories);
 router.post('/categories', createCategory);
+router.put('/categories/:id', updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 router.get('/enquiries', getEnquiries);
 router.get('/enquiries/:id', getEnquiryById);

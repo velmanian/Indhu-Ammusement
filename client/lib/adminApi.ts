@@ -20,6 +20,10 @@ export const createProduct = async (data: any) => {
     headers: getAuthHeader(),
     body: JSON.stringify(data),
   });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to create product');
+  }
   return res.json();
 };
 
@@ -29,7 +33,10 @@ export const updateProduct = async (id: string, data: any) => {
     headers: getAuthHeader(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update product');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update product');
+  }
   return res.json();
 };
 
@@ -39,7 +46,10 @@ export const deleteProduct = async (id: string) => {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error('Failed to delete product');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to delete product');
+  }
   return res.json();
 };
 

@@ -39,3 +39,47 @@ export const addFallbackCategory = (category: any) => {
     data.categories.push(category);
     saveFallbackData(data);
 };
+
+export const updateFallbackCategory = (id: string, categoryData: any) => {
+    const data = getFallbackData();
+    const index = data.categories.findIndex(c => c._id === id || c.id === id);
+    if (index !== -1) {
+        data.categories[index] = { ...data.categories[index], ...categoryData };
+        saveFallbackData(data);
+        return data.categories[index];
+    }
+    return null;
+};
+
+export const deleteFallbackCategory = (id: string) => {
+    const data = getFallbackData();
+    const index = data.categories.findIndex(c => c._id === id || c.id === id);
+    if (index !== -1) {
+        data.categories.splice(index, 1);
+        saveFallbackData(data);
+        return true;
+    }
+    return false;
+};
+
+export const updateFallbackProduct = (id: string, productData: any) => {
+    const data = getFallbackData();
+    const index = data.products.findIndex(p => p._id === id || p.id === id);
+    if (index !== -1) {
+        data.products[index] = { ...data.products[index], ...productData };
+        saveFallbackData(data);
+        return data.products[index];
+    }
+    return null;
+};
+
+export const deleteFallbackProduct = (id: string) => {
+    const data = getFallbackData();
+    const index = data.products.findIndex(p => p._id === id || p.id === id);
+    if (index !== -1) {
+        data.products.splice(index, 1);
+        saveFallbackData(data);
+        return true;
+    }
+    return false;
+};

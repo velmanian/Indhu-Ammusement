@@ -5,6 +5,7 @@ import { getFallbackData, saveFallbackData } from '../lib/fallbackDb';
 import { v2 as cloudinary } from 'cloudinary';
 import { ProductModel } from '../models/Product';
 import { CategoryModel } from '../models/Category';
+import { getIsConnected } from '../lib/database';
 
 // Temporary in-memory store for ZIP mapping (resets on server restart)
 let imageMapping: { [key: string]: string } = {};
@@ -30,26 +31,36 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
 
             const categoryName = item.Category || item.category || 'Other';
 
-            // 1. Handle Category (DB or Fallback)
+            // 1. Handle Category (Unified Check)
             let categoryId: any = null;
             let categoryInfo: any = null;
 
-            try {
-                let dbCategory = await CategoryModel.findOne({
-                    $or: [{ name: categoryName }, { slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-') }]
-                });
-
-                if (!dbCategory) {
-                    dbCategory = await CategoryModel.create({
-                        name: categoryName,
-                        slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+            if (getIsConnected()) {
+                try {
+                    let dbCategory = await CategoryModel.findOne({
+                        $or: [{ name: categoryName }, { slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-') }]
                     });
+
+                    if (!dbCategory) {
+                        dbCategory = await CategoryModel.create({
+                            name: categoryName,
+                            slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                        });
+                    }
+                    categoryId = dbCategory._id;
+                    categoryInfo = { _id: dbCategory._id, id: dbCategory._id, name: dbCategory.name, slug: dbCategory.slug };
+                } catch (err) {
+                    console.error('DB error in bulk category handling:', err);
                 }
-                categoryId = dbCategory._id;
-                categoryInfo = { _id: dbCategory._id, id: dbCategory._id, name: dbCategory.name, slug: dbCategory.slug };
-            } catch (err) {
-                console.warn('DB error in bulk category handling, using fallback:', categoryName);
-                let fCat = fallback.categories.find(c => c.name === categoryName);
+            }
+
+            // Fallback check if DB fail or offline
+            if (!categoryId) {
+                let fCat = fallback.categories.find(c =>
+                    c.name.toLowerCase() === categoryName.toLowerCase() ||
+                    c.slug === categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                );
+
                 if (!fCat) {
                     fCat = {
                         _id: 'offline_cat_' + Date.now() + i,
@@ -93,12 +104,20 @@ export const bulkUploadProducts = async (req: Request, res: Response) => {
             };
 
             // 3. Save to DB or Fallback
-            try {
-                // Use upsert by slug
-                await ProductModel.findOneAndUpdate({ slug }, productData, { upsert: true, new: true });
-                newProducts.push({ ...productData, category: categoryInfo });
-            } catch (err) {
-                console.error('DB error in bulk product save, using fallback:', name);
+            let savedToDb = false;
+            if (getIsConnected()) {
+                try {
+                    // Use upsert by slug
+                    await ProductModel.findOneAndUpdate({ slug }, productData, { upsert: true, new: true });
+                    newProducts.push({ ...productData, category: categoryInfo });
+                    savedToDb = true;
+                } catch (err) {
+                    console.error('DB error in bulk product save:', err);
+                }
+            }
+
+            if (!savedToDb) {
+                console.warn('Persisting bulk product to local fallback:', name);
                 const fallbackProduct = {
                     ...productData,
                     _id: 'bulk_' + Date.now() + i,

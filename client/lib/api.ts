@@ -2,7 +2,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export const fetchPublic = async (endpoint: string) => {
   const res = await fetch(`${API_URL}/public${endpoint}`);
-  if (!res.ok) throw new Error('API request failed');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'API request failed');
+  }
   return res.json();
 };
 
@@ -12,7 +15,10 @@ export const postEnquiry = async (data: any) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to submit enquiry');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to submit enquiry');
+  }
   return res.json();
 };
 
@@ -22,6 +28,9 @@ export const loginAdmin = async (credentials: any) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
   });
-  if (!res.ok) throw new Error('Login failed');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Login failed');
+  }
   return res.json();
 };
