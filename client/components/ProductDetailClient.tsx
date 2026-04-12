@@ -15,15 +15,24 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
     const loadProduct = async () => {
       try {
         const data = await fetchPublic(`/products/${slug}`);
-        setProduct(data);
+        if (data) {
+          setProduct(data);
+        } else {
+          throw new Error('Product not found in API');
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Error loading product, using fallback:', err);
+        const fallbackProd = import('@/lib/fallbackData').then(m => m.FALLBACK_PRODUCTS.find(p => p.slug === slug));
+        fallbackProd.then(data => {
+            if(data) setProduct(data as Product);
+        })
       } finally {
         setLoading(false);
       }
     };
     loadProduct();
   }, [slug]);
+
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
